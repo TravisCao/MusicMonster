@@ -4,9 +4,6 @@
 #include <QObject>
 #include <QWidget>
 
-namespace Ui {
-    class Form;
-}
 
 class effectHistoryWidget : public QWidget
 {
@@ -17,8 +14,7 @@ public:
 signals:
 
 public slots:
-private:
-    Ui::Form *ui;
+
 };
 
 #endif // EFFECTHISTORYWIDGET_H

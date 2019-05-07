@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-effectHistoryWidget::effectHistoryWidget(QWidget *parent) : QWidget(parent), ui(new Ui::Form)
+effectHistoryWidget::effectHistoryWidget(QWidget *parent) : QWidget(parent)
 {
-    ui->setupUi(this);
+
 }

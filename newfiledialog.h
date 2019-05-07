@@ -2,17 +2,27 @@
 #define NEWFILEDIALOG_H
 
 #include <QDialog>
+#include <QString>
 
 namespace Ui {
     class Dialog;
 }
 
-class newFileDialog : public QDialog
+class NewFileDialog : public QDialog
 {
     Q_OBJECT
 public:
-    newFileDialog(QWidget *parent = nullptr);
-    ~newFileDialog();
+    NewFileDialog(QWidget *parent = nullptr);
+    void dialogInit();
+    QString getLocation();
+    QString getName();
+    QString getSampleRate();
+    QString getBitDepth();
+
+
+private slots:
+    void on_browseButton_clicked();
+
 
 private:
     Ui::Dialog *ui;

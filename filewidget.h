@@ -2,23 +2,44 @@
 #define FILEWIDGET_H
 
 #include <QWidget>
+#include <QTableView>
+#include <QString>
+#include <QStandardItemModel>
+#include <QStandardItem>
+#include <QList>
 
-namespace Ui {
-    class Form;
-}
-
-class fileWidget : public QWidget
+class FileWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit fileWidget(QWidget *parent = nullptr);
+
+    explicit FileWidget(QWidget *parent = nullptr);
+    void modelInit(QTableView *table);
+
+
 
 signals:
 
 public slots:
 
-private:
-    Ui::Form *ui;
+protected:
+    QStandardItemModel *fileModel;
+
+    struct fileItem
+    {
+        QStandardItem *fileName;
+        QStandardItem *duration;
+        QStandardItem *sampleRate;
+        QStandardItem *channels;
+        QStandardItem *bitDepth;
+    };
+
+public:
+    friend class MainWindow;
+    void addItem(struct fileItem item);
+    void removeItem(int row);
+    void searchItem();
+
 };
 
 #endif // FILEWIDGET_H

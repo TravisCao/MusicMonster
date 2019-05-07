@@ -101,10 +101,18 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="nameEdit"/>
+        <widget class="QLineEdit" name="nameEdit">
+         <property name="placeholderText">
+          <string>Untitled Session 1</string>
+         </property>
+        </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QComboBox" name="rateComboBox"/>
+        <widget class="QComboBox" name="rateComboBox">
+         <property name="currentText">
+          <string/>
+         </property>
+        </widget>
        </item>
        <item row="1" column="2">
         <widget class="QPushButton" name="browseButton">
@@ -114,7 +122,21 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="lineEdit_2"/>
+        <widget class="QLineEdit" name="locationEdit"/>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="sampleRateLabel_2">
+         <property name="text">
+          <string>Hz</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QLabel" name="bitDepthLabel_2">
+         <property name="text">
+          <string>bits</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

@@ -1,12 +1,26 @@
 #include "mainwindow.h"
+#include "newfiledialog.h"
 #include "ui_mainwindowForm.h"
-#include "ui_newdialogForm.h"
+#include "readwav.h"
+#include "audio.h"
+#include "changefactor.h"
 
 #include <QStandardItemModel>
+#include <QAbstractItemView>
 #include <QStandardItem>
 #include <QDebug>
+#include <QList>
 #include <QString>
 #include <QAction>
+#include <QSound>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QDir>
+#include <QMediaPlayer>
+#include <QStringList>
+#include <QFileInfo>
+#include <QAudioFormat>
+#include <QAudioInput>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     uiMainWindow(new Ui::MainWindow)
@@ -23,15 +37,71 @@ MainWindow::~MainWindow()
 
 void MainWindow::newFile()
 {
+    newFileDialog = new NewFileDialog(this);
+    newFileDialog->show();
     qDebug() << "new";
 }
-void MainWindow::openFile()
+
+void MainWindow::changeFactor()
 {
-    qDebug() << "open";
+    change = new ChangeFactor(this);
+    change->show();
+    qDebug() << "change";
 }
+
+QList<QString> *MainWindow::openFile()
+{
+
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"),
+                                                     "/home",
+                                                     tr("Audios (*.wav *.mp3)"));
+    for (int i = 0; i < fileNames.size(); ++i) {
+        QString fileName = fileNames.at(i);
+        QFile file(fileName);
+        if (!file.open(QFile::ReadOnly)) {
+            QMessageBox::warning(this, tr("MusicMonster"),
+                                 tr("Cannot read file %1:\n%2.")
+                                 .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+            return &openedFileNames;
+        }
+        string filenameString = fileName.toStdString();
+        QMediaPlayer *player = new QMediaPlayer();
+        player->setMedia(QUrl::fromLocalFile(fileName));
+        player->setVolume(50);
+        player->play();
+
+        openedFileNames << fileName;
+        WavInFile *wavfile = new WavInFile(filenameString.data());
+        QString sampleRate(wavfile->getSampleRate());
+        QString channel(wavfile->getChannels());
+        QString bitBepth(wavfile->getBitsPerSample());
+        QString duration(wavfile->getLengthInMS());
+
+        QFileInfo info = QFileInfo(fileName);
+        QAudioFormat format;
+
+        QList<QStandardItem *> itemList;
+        struct FileWidget::fileItem item;
+
+        //waiting
+        QString name = info.fileName();
+        item.fileName = new QStandardItem(name);
+        item.bitDepth = new QStandardItem(bitBepth);
+        item.channels = new QStandardItem(channel);
+        item.duration = new QStandardItem(duration);
+        item.sampleRate = new QStandardItem(sampleRate);
+        fileWidget->addItem(item);
+    }
+
+    qDebug() << "open";
+    return &openedFileNames;
+}
+
 
 void MainWindow::about()
 {
+    QMessageBox::about(this, tr("About MusicMonster"),
+             tr("An audio workstation project for CSC3002."));
     qDebug() << "about";
 }
 
@@ -42,20 +112,17 @@ void MainWindow::saveFile()
 
 void MainWindow::modelInit()
 {
-    fileModel = new QStandardItemModel(10, 6);
-    fileModel->setHorizontalHeaderLabels(QStringList() << "Name:" << "Duration" << "Sample Rates" << "Channels" << "Bit Depth" << "Source Format");
-
-    uiMainWindow->tableView->setModel(fileModel);
-
-    for (int i = 0; i < 10; ++i) {
-        uiMainWindow->tableView->setRowHeight(i,10);
-    }
-
-    uiMainWindow->tableView->setShowGrid(false);
-
+    uiMainWindow->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    uiMainWindow->tableView->resizeColumnsToContents();
+    uiMainWindow->tableView->setAlternatingRowColors(true);
+    uiMainWindow->tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    uiMainWindow->tableView->setStyleSheet("QTableView::item { \
+                                               height: 10px; \
+                                               }");
+    fileWidget->modelInit(uiMainWindow->tableView);
 
     effectModel = new QStandardItemModel(20,1);
-    uiMainWindow->listView_1->setModel(effectModel);
+    uiMainWindow->effectList->setModel(effectModel);
 
     for (int i = 0; i < 20; ++i) {
         QStandardItem *item = new QStandardItem();
@@ -63,7 +130,7 @@ void MainWindow::modelInit()
     }
 
     historyModel = new QStandardItemModel(20,1);
-    uiMainWindow->listView_2->setModel(historyModel);
+    uiMainWindow->historyList->setModel(historyModel);
 
     for (int i = 0; i < 20; ++i) {
         QStandardItem *item = new QStandardItem();
@@ -79,6 +146,7 @@ void MainWindow::actionInit()
     connect(uiMainWindow->actionOpen, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(uiMainWindow->actionAbout_Music_Mosnter, SIGNAL(triggered()), this, SLOT(about()));
     connect(uiMainWindow->actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(uiMainWindow->actionChangeFactor, SIGNAL(triggered()), this, SLOT(changeFactor()));
 }
 
 

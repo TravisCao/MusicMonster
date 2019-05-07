@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/newFile.jpg</file>
+        <file>icon/delete.jpg</file>
+        <file>icon/importFile.jpg</file>
+        <file>icon/openFile.jpg</file>
+        <file>darkstyle.qss.stylesheet</file>
+        <file>icon/play.jpg</file>
+        <file>icon/pauseDark.jpg</file>
+        <file>icon/pause.jpg</file>
+        <file>icon/stop.jpg</file>
+        <file>icon/add_bottom.png</file>
+        <file>icon/add_left.png</file>
+        <file>icon/add_right.png</file>
+        <file>icon/add_top.png</file>
+        <file>icon/branch_close.png</file>
+        <file>icon/branch_open.png</file>
+        <file>icon/calendar_nextmonth.png</file>
+        <file>icon/calendar_prevmonth.png</file>
+        <file>icon/checkbox_checked_disable.png</file>
+        <file>icon/checkbox_checked.png</file>
+        <file>icon/checkbox_parcial_disable.png</file>
+        <file>icon/checkbox_parcial.png</file>
+        <file>icon/checkbox_unchecked_disable.png</file>
+        <file>icon/checkbox_unchecked.png</file>
+        <file>icon/radiobutton_checked_disable.png</file>
+        <file>icon/radiobutton_checked.png</file>
+        <file>icon/radiobutton_unchecked_disable.png</file>
+        <file>icon/radiobutton_unchecked.png</file>
+    </qresource>
+</RCC>
