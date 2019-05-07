@@ -33,9 +33,7 @@ SOURCES += \
     filewidget.cpp \
     audio.cpp \
     readwav.cpp \
-    changefactor.cpp \
-    MMrateModifier.cpp \
-    MMbuffer.cpp
+    changefactor.cpp
 
 
 HEADERS += \
@@ -45,9 +43,7 @@ HEADERS += \
     filewidget.h \
     audio.h \
     readwav.h \
-    changefactor.h \
-    MMrateModifier.h \
-    MMbuffer.h
+    changefactor.h
 
 FORMS += \
     newdialogForm.ui \
