@@ -5,22 +5,22 @@
 #include <QDialog>
 
 namespace Ui {
-    class Dialog;
+    class changeDialog;
 }
 
 class ChangeFactor : public QDialog
 {
+
     Q_OBJECT
+
 public:
-    explicit ChangeFactor(QWidget *parent = nullptr);
+
+    ChangeFactor(QWidget *parent = nullptr);
     void dialogInit();
 
-signals:
-
-public slots:
 
 private:
-    Ui::Dialog *ui;
+    Ui::changeDialog *ui;
 
 };
 

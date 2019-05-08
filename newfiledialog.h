@@ -5,13 +5,15 @@
 #include <QString>
 
 namespace Ui {
-    class Dialog;
+    class newDialog;
 }
 
 class NewFileDialog : public QDialog
 {
     Q_OBJECT
+
 public:
+
     NewFileDialog(QWidget *parent = nullptr);
     void dialogInit();
     QString getLocation();
@@ -25,7 +27,7 @@ private slots:
 
 
 private:
-    Ui::Dialog *ui;
+    Ui::newDialog *ui;
 };
 
 #endif // NEWFILEDIALOG_H

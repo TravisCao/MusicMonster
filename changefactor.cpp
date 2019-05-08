@@ -1,10 +1,10 @@
 #include "changefactor.h"
 #include "ui_changefactordialog.h"
 
-#include <QWidget>
 #include <QDialog>
+#include <QDebug>
 
-ChangeFactor::ChangeFactor(QWidget *parent) : QDialog(parent), ui(new Ui::Dialog)
+ChangeFactor::ChangeFactor(QWidget *parent) : QDialog(parent), ui(new Ui::changeDialog)
 {
     ui->setupUi(this);
     dialogInit();
@@ -12,18 +12,17 @@ ChangeFactor::ChangeFactor(QWidget *parent) : QDialog(parent), ui(new Ui::Dialog
 
 void ChangeFactor::dialogInit()
 {
-    ui->ratebox->setEditable(false);
+
     ui->ratebox->addItem(tr("0.5"));
     ui->ratebox->addItem(tr("1.5"));
     ui->ratebox->addItem(tr("2"));
 
-    ui->ratebox->setEditable(false);
     ui->pitchbox->addItem(tr("0.5"));
     ui->pitchbox->addItem(tr("1.5"));
     ui->pitchbox->addItem(tr("2"));
 
-    ui->ratebox->setEditable(false);
     ui->tempobox->addItem(tr("0.5"));
     ui->tempobox->addItem(tr("1.5"));
     ui->tempobox->addItem(tr("2"));
+
 }

@@ -46,7 +46,7 @@ private:
     QStandardItemModel *fileModel;
     QStandardItemModel *effectModel;
     QStandardItemModel *historyModel;
-    ChangeFactor *change;
+
 };
 
 #endif // MAINWINDOW_H

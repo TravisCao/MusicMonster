@@ -6,14 +6,18 @@
 #include <QFileDialog>
 #include <QDir>
 
-NewFileDialog::NewFileDialog(QWidget *parent) :QDialog(parent), ui(new Ui::Dialog)
+NewFileDialog::NewFileDialog(QWidget *parent) :QDialog(parent), ui(new Ui::newDialog)
 {
+
     ui->setupUi(this);
     dialogInit();
+
 }
 
 void NewFileDialog::dialogInit()
+
 {
+
     ui->rateComboBox->setEditable(false);
     ui->rateComboBox->addItem(tr("32"));
     ui->rateComboBox->addItem(tr("24"));
@@ -29,16 +33,19 @@ void NewFileDialog::dialogInit()
 }
 
 QString NewFileDialog::getLocation()
+
 {
     return ui->locationEdit->text();
 }
 
 QString NewFileDialog::getName()
+
 {
     return ui->nameEdit->text();
 }
 
 QString NewFileDialog::getSampleRate()
+
 {
     return ui->rateComboBox->currentText();
 }

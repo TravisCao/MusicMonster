@@ -44,9 +44,8 @@ void MainWindow::newFile()
 
 void MainWindow::changeFactor()
 {
-    change = new ChangeFactor(this);
+    ChangeFactor *change = new ChangeFactor(this);
     change->show();
-    qDebug() << "change";
 }
 
 QList<QString> *MainWindow::openFile()
