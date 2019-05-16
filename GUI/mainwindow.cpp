@@ -66,14 +66,9 @@ QList<QString> *MainWindow::openFile()
             return &openedFileNames;
         }
         openedFileNames << fileName;
-//      QMediaPlayer *player = new QMediaPlayer();
-//      player->setMedia(QUrl::fromLocalFile(fileName));
-//      player->setVolume(50);
-//      player->play();
         fileWidget->addItem(fileName);
     }
 
-    qDebug() << "open";
     return &openedFileNames;
 }
 

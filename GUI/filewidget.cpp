@@ -44,7 +44,7 @@ void FileWidget::addItem(QString fileName)
     QString sampleRate = uintToQString(wavfile->getSampleRate());
     QString channel = uintToQString(wavfile->getChannels());
     QString bitBepth = uintToQString(wavfile->getBitsPerSample());
-    QString duration = uintToQString(wavfile->getLengthInMS());
+    QString duration = QString::fromStdString(wavfile->getLengthInMS());
 
     struct fileItem item;
 

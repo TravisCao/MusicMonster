@@ -7,6 +7,9 @@
 #include <QTimer>
 #include <QAudio>
 #include <QtDebug>
+#include <QUrl>
+#include <QFileInfo>
+#include <QUrl>
 #include <QAudioDeviceInfo>
 #include <QMediaPlayer>
 #include <QTime>
@@ -14,23 +17,23 @@
 // open a new file
 Audio::Audio(int sampleRate, int channelCount, QWidget *parent)
 {
-        QAudioFormat format;
-        // Set up the desired format, for example:
-        format.setSampleRate(sampleRate);
-        format.setChannelCount(channelCount);
-        format.setSampleSize(8);
-        format.setCodec("audio/pcm");
-        format.setByteOrder(QAudioFormat::LittleEndian);
-        format.setSampleType(QAudioFormat::UnSignedInt);
+    timer = new QTimer(this);
 
-        QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
-        if (!info.isFormatSupported(format)) {
-            qWarning() << "Default format not supported, trying to use the nearest.";
-            format = info.nearestFormat(format);
-        }
+    QAudioFormat format;
+    // Set up the desired format, for example:
+    format.setSampleRate(sampleRate);
+    format.setChannelCount(channelCount);
+    format.setSampleSize(8);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
 
-        audioInput = new QAudioInput(format, this);
-        connect(audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Default format not supported, trying to use the nearest.";
+        format = info.nearestFormat(format);
+    }
+
 }
 
 // open an existed file
@@ -38,6 +41,8 @@ Audio::Audio(int sampleRate, int channelCount, QString fileName, QWidget * paren
 
     destinationFile->setFileName(fileName);
     destinationFile->open(QIODevice::ReadWrite);
+
+    timer = new QTimer(this);
 
     QAudioFormat format;
     format.setSampleRate(sampleRate);
@@ -53,8 +58,12 @@ Audio::Audio(int sampleRate, int channelCount, QString fileName, QWidget * paren
         format = info.nearestFormat(format);
     }
 
-    audioInput = new QAudioInput(format, this);
-    connect(audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+    player = new QMediaPlayer(this);
+    playList->addMedia(QUrl::fromLocalFile(fileName));
+    playList->setCurrentIndex(0);
+    player->setPlaylist(playList);
+
+    connect(player, SIGNAL(positionChanged(qint64)), this, SLOT(positionUpdate(qint64)));
 
 }
 
@@ -68,67 +77,83 @@ int Audio::getChannelCount()
     return format->channelCount();
 }
 
-qint64 Audio::getAudioDuration()
+void Audio::playAndPause(int index)
 {
-       if (destinationFile->open(QIODevice::ReadOnly)) {
-           qint64 fileSize = destinationFile->size();
-           qint64 time = qint64(fileSize / (16000.0 * 2.0));
-           destinationFile->close();
-           return time;
-       }
-       return -1;
-}
-
-void Audio::audioOnPlay(QString fileDir)
-{
-    QMediaPlayer *player = new QMediaPlayer();
-    player->setMedia(QUrl::fromLocalFile(fileDir));
-    player->setVolume(50);
-    player->play();
-    timer->start();
-
-    audioOutput = new QAudioOutput(*format);
-    connect(audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-}
-
-void Audio::handleStateChanged(QAudio::State state)
-{
-    switch (state) {
-        case QAudio::IdleState:
-            // Finished playing (no more data)
-            qDebug() << "elapsedUSecs:" << audioOutput->elapsedUSecs();
-            audioOnStop();
-            break;
-
-        case QAudio::StoppedState:
-            // Stopped for other reasons
-            if (audioOutput->error() != QAudio::NoError) {
-                // Error handling
-            }
-            break;
-
-        default:
-            break;
+    // if the music index is the current index
+    // play or pause the music
+    if (index == playList->currentIndex()) {
+        if (player->state() == QMediaPlayer::PlayingState) {
+            player->pause();
+            timer->stop();
         }
-}
-
-void Audio::audioOnStop()
-{
-    if (audioOutput != nullptr)
-        {
-            audioOutput->stop();
-            destinationFile->close();
-            delete audioOutput;
-            audioOutput = nullptr;
+        else {
+            player->play();
+//            timer->start(1000);
+    //        connect();
         }
+    }
+    else {
+        playList->setCurrentIndex(index);
+        if (player->state() == QMediaPlayer::PlayingState) {
+            player->pause();
+            timer->stop();
+        }
+        else { // if the music is not playing now
+            player->setPosition(0); // play the music from the beginning
+            player->play();
+//            timer->start(1000);
+    //        connect();
+        }
+    }
+
 }
 
-void Audio::readAudioFile(QString fileName)
+QString Audio::getAudioDuration(qint64 position)
 {
-    QFile *file = new QFile(fileName);
-    destinationFile = file;
+    return timeString;
 }
 
-//void Audio::getAudioDuration(const qint64 &Position)
-//{
-//}
+void Audio::musicRecycle(bool flag)
+{
+
+    if (flag == 0) playList->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    if (flag == 1) playList->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
+
+}
+
+void Audio::musicSpeedUp()
+{
+    player->setPlaybackRate(1.2);
+}
+
+void Audio::musicSlowDown()
+{
+    player->setPlaybackRate(0.8);
+}
+
+void Audio::musicStop()
+{
+    player->setPosition(0);
+    player->stop();
+}
+
+void Audio::volumeControl(int volume)
+{
+    player->setVolume(volume);
+}
+
+void Audio::positionUpdate(qint64 position)
+{
+    QTime timeMoved(0, (position * 1000 / 60000) % 60, (position * 1000 / 1000) % 60);
+    timeString = timeMoved.toString("mm:ss");
+}
+
+void Audio::record()
+{
+
+}
+
+bool Audio::isPlayListEmpty()
+{
+    return true;
+}

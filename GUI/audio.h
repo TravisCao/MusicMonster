@@ -10,29 +10,44 @@
 #include <QWidget>
 #include <QString>
 #include <QTimer>
+#include <QMediaPlaylist>
+#include <QMediaPlayer>
+#include <QPoint>
 
 class Audio : public QWidget
 {
     Q_OBJECT
+
 public:
     Audio(int sampleRate, int channelCount,QWidget *parent = nullptr); // new audio file
     Audio(int sampleRate, int channelCount, QString fileName, QWidget * parent = nullptr); // open an existed file
-    void readAudioFile(QString fileName);
     int getSampleRate();
     int getChannelCount();
-    qint64 getAudioDuration();
-    void audioOnPlay(QString fileDir);
-    void handleStateChanged(QAudio::State state);
-    void getAudioDuration(qint64 &position);
-    void audioOnStop();
 
+public slots:
+    void playAndPause(int index);
+    QString getAudioDuration(qint64 position);
+    void musicRecycle(bool flag);
+    void musicSpeedUp();
+    void musicSlowDown();
+    void musicStop();
+    void volumeControl(int volume);
+    void positionUpdate(qint64 position);
+    void record();
+    bool isPlayListEmpty();
 
 private:
+
     QFile *destinationFile;
+    bool recycleFlag;
+    QMediaPlaylist *playList;
+    QMediaPlayer *player;
     QAudioFormat *format;
     QAudioInput *audioInput;
     QAudioOutput *audioOutput;
     QTimer *timer;
+    QPoint Position;
+    QString timeString;
 };
 
 #endif // AUDIO_H

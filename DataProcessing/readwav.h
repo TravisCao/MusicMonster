@@ -80,7 +80,7 @@ public:
     uint getNumSamples() const;
     uint getBytesPerSample() const;
     uint getChannels() const;
-    uint getLengthInMS() const;
+    string getLengthInMS() const;
     uint getElapsedMS() const;
     uint getByteRate() const;
 

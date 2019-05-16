@@ -3,6 +3,7 @@
 #include <sstream>
 #include <stdio.h>
 #include "readwav.h"
+#include <QDebug>
 using namespace std;
 
 static const char riffStr[] = "RIFF";
@@ -221,15 +222,33 @@ uint WavInFile::getChannels() const
     return format.ChannelNum;
 }
 
-uint WavInFile::getLengthInMS() const
+string WavInFile::getLengthInMS() const
 {
+    uint timeInMS;
+    string s, min, h;
+    string time;
     double numSamples;
     double sampleRate;
 
     numSamples = static_cast<double>(getNumSamples());
     sampleRate = static_cast<double>(getSampleRate());
+    timeInMS = static_cast<uint>(1000.0 * numSamples / sampleRate + 0.5);
 
-    return static_cast<uint>(1000.0 * numSamples / sampleRate + 0.5);
+    qDebug() << QString::fromStdString(to_string(timeInMS));
+
+    s = to_string((timeInMS / 1000) % 60);
+    qDebug() << QString::fromStdString(s);
+    min = to_string((timeInMS / 60000) % 60);
+    qDebug() << QString::fromStdString(min);
+    h = to_string((timeInMS / 3600000) % 60);
+    qDebug() << QString::fromStdString(h);
+
+    if (h.size() < 2) h = "0" + h;
+    if (min.size() < 2) min = "0" + min;
+    if (s.size() < 2) s = "0" + s;
+
+    time = h+":"+min+":"+s;
+    return time;
 }
 
 /// Returns how many milliseconds of audio have so far been read from the file

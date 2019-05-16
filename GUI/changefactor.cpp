@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QDebug>
+#include <QStandardItem>
 
 ChangeFactor::ChangeFactor(QWidget *parent) : QDialog(parent), ui(new Ui::changeDialog)
 {
