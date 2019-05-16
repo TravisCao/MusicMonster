@@ -15,13 +15,15 @@ class Audio : public QWidget
 {
     Q_OBJECT
 public:
-    Audio(QWidget *parent = nullptr); // new audio file
+    Audio(int sampleRate, int channelCount,QWidget *parent = nullptr); // new audio file
+    Audio(int sampleRate, int channelCount, QString fileName, QWidget * parent = nullptr); // open an existed file
     void readAudioFile(QString fileName);
     int getSampleRate();
     int getChannelCount();
     qint64 getAudioDuration();
-    void audioOnPlay();
+    void audioOnPlay(QString fileDir);
     void handleStateChanged(QAudio::State state);
+    void getAudioDuration(qint64 &position);
     void audioOnStop();
 
 

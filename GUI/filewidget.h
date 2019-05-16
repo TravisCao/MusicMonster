@@ -15,16 +15,17 @@ public:
 
     explicit FileWidget(QWidget *parent = nullptr);
     void modelInit(QTableView *table);
-
+    QString uintToQString(uint number);
 
 
 signals:
 
-public slots:
+private slots:
+
+//    void infoUpdate();
+
 
 protected:
-    QStandardItemModel *fileModel;
-
     struct fileItem
     {
         QStandardItem *fileName;
@@ -34,9 +35,13 @@ protected:
         QStandardItem *bitDepth;
     };
 
-public:
+    QStandardItemModel *fileModel;
+
+    QList<QString> openedFileNames;
+
+private:
     friend class MainWindow;
-    void addItem(struct fileItem item);
+    void addItem(QString fileName);
     void removeItem(int row);
     void searchItem();
 

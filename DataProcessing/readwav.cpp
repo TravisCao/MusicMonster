@@ -1,7 +1,9 @@
+#include <iostream>
 #include <string>
 #include <sstream>
 #include <stdio.h>
 #include "readwav.h"
+using namespace std;
 
 static const char riffStr[] = "RIFF";
 static const char waveStr[] = "WAVE";
@@ -10,14 +12,11 @@ static const char factStr[] = "fact";
 static const char dataStr[] = "data";
 
 WavInFile::WavInFile(const char *fileName) {
+
     fptr = fopen(fileName, "rb");
     if (fptr == NULL)
     {
-        // didn't succeed
-        string msg = "Error : Unable to open file \"";
-        msg += fileName;
-        msg += "\" for reading.";
-//        error(msg.c_str());
+        checkFlag = 1;
     }
     init();
 }
@@ -35,7 +34,7 @@ void WavInFile::init() {
     int checkP;
     checkP = checkParameter();
     if ((checkF != 0) || (checkP != 0)) {
-//        error("This file is not a wav file or is not a wav file that with standard format.")
+        checkFlag = 1;
     }
 }
 
@@ -56,7 +55,9 @@ int WavInFile::checkFormat() {
 }
 
 int WavInFile::readRIFF() {
-    if (fread(&(riff), sizeof(WavRiff), 1, fptr) != 1) return -1;
+    if (fread(&(riff.Riff), sizeof(riff.Riff), 1, fptr) != 1) return -1;
+    if (fread(&(riff.lenAll), sizeof(riff.lenAll), 1, fptr) != 1) return -1;
+    if (fread(&(riff.Wave), sizeof(riff.Wave), 1, fptr) != 1) return -1;
 
     if (memcmp(riffStr, riff.Riff, 4) != 0) return -1;
     if (memcmp(waveStr, riff.Wave, 4) != 0) return -1;
@@ -66,8 +67,8 @@ int WavInFile::readRIFF() {
 
 int WavInFile::readHeader() {
     char label[5];
-
     if (fread(label, 1, 4, fptr) != 4) return -1;
+    //cout << label;
     label[4] = 0;
 
     //'format' block
@@ -241,8 +242,8 @@ uint WavInFile::getElapsedMS() const
  * ---------------------------------------------------------------------------------------------------------
  */
 
-///// Read data in float format. Notice that when reading in float format
-///// 8/16/24/32 bit sample formats are supported
+/// Read data in float format. Notice that when reading in float format
+/// 8/16/24/32 bit sample formats are supported
 //int WavInFile::read(float *buffer, int maxElems)
 //{
 //    unsigned int afterDataRead;
@@ -259,7 +260,7 @@ uint WavInFile::getElapsedMS() const
 //        ss << "\nOnly 8/16/24/32 bit sample WAV files supported. Can't open WAV file with ";
 //        ss << static_cast<int>(format.BitsPerSample);
 //        ss << " bit sample format. ";
-////        error(ss.str().c_str());
+//        //error(ss.str().c_str());
 //    }
 
 //    numBytes = maxElems * bytesPerSample;
@@ -272,7 +273,7 @@ uint WavInFile::getElapsedMS() const
 //    }
 
 //    // read raw data into temporary buffer
-////    char *temp = (char*)getConvBuffer(numBytes);
+//    char *temp = (char*)getConvBuffer(numBytes);
 //    numBytes = static_cast<int>(fread(temp, 1, numBytes, fptr));
 //    dataRead += numBytes;
 
@@ -356,7 +357,7 @@ WavOutFile::WavOutFile(const char *fileName, int sampleRate, int bits, int chann
         msg += fileName;
         msg += "\" for writing.";
         //pmsg = msg.c_str;
-//        error(msg.c_str());
+        //error(msg.c_str());
     }
 
     writeBaseHeader(sampleRate, bits, channels);
@@ -431,7 +432,7 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
 
 //    bytesPerSample = format.BitsPerSample / 8;
 //    numBytes = numElems * bytesPerSample;
-////    void *temp = getConvBuffer(numBytes + 7);   // round bit up to avoid buffer overrun with 24bit-value assignment
+//    void *temp = getConvBuffer(numBytes + 7);   // round bit up to avoid buffer overrun with 24bit-value assignment
 
 //    switch (bytesPerSample)
 //    {
@@ -458,7 +459,7 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
 
 //        case 3:
 //        {
-////            char *temp2 = (char *)temp;
+//            char *temp2 = (char *)temp;
 //            for (int i = 0; i < numElems; i ++)
 //            {
 //                int value = saturate(buffer[i] * 8388608.0f, -8388608.0f, 8388607.0f);
@@ -470,7 +471,7 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
 
 //        case 4:
 //        {
-////            int *temp2 = (int *)temp;
+//            int *temp2 = (int *)temp;
 //            for (int i = 0; i < numElems; i ++)
 //            {
 //                int value = saturate(buffer[i] * 2147483648.0f, -2147483648.0f, 2147483647.0f);
@@ -481,11 +482,19 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
 
 //    }
 
-////    int res = (int)fwrite(temp, 1, numBytes, fptr);
+//    int res = (int)fwrite(temp, 1, numBytes, fptr);
 
 //    if (res != numBytes)
 //    {
-////        error("Error while writing to a wav file.");
+//        error("Error while writing to a wav file.");
 //    }
 //    bytesWritten += numBytes;
 //}
+
+
+
+
+
+
+
+

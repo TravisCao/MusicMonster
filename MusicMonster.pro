@@ -27,34 +27,43 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
-    newfiledialog.cpp \
-    effecthistorywidget.cpp \
-    filewidget.cpp \
-    audio.cpp \
-    changefactor.cpp
+    DataProcessing/readwav.cpp \
+    GUI/audio.cpp \
+    GUI/changefactor.cpp \
+    GUI/effecthistorywidget.cpp \
+    GUI/filewidget.cpp \
+    GUI/mainwindow.cpp \
+    GUI/newfiledialog.cpp
 
 
 HEADERS += \
-        mainwindow.h \
-    newfiledialog.h \
-    effecthistorywidget.h \
-    filewidget.h \
-    audio.h \
-    changefactor.h
+    DataProcessing/readwav.h \
+    GUI/audio.h \
+    GUI/changefactor.h \
+    GUI/effecthistorywidget.h \
+    GUI/filewidget.h \
+    GUI/mainwindow.h \
+    GUI/newfiledialog.h
 
 FORMS += \
-    newdialogForm.ui \
-    mainwindowForm.ui \
-    changefactordialog.ui
+    GUI/newdialogForm.ui \
+    GUI/mainwindowForm.ui \
+    GUI/changefactordialog.ui \
+    GUI/effecthistorywidget.ui \
+    GUI/form.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-
-
+INCLUDEPATH += /Users/travis/Documents/MusicMonster/DataProcessing
+INCLUDEPATH += /Users/travis/Documents/MusicMonster/GUI
+INCLUDEPATH += /Users/travis/Documents/MusicMonster/Filter
+INCLUDEPATH += /Users/travis/Documents/MusicMonster/VersionForTest
 
 RESOURCES += \
     images.qrc
+
+SUBDIRS += \
+    MusicMonster.pro

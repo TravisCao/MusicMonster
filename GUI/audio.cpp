@@ -8,17 +8,16 @@
 #include <QAudio>
 #include <QtDebug>
 #include <QAudioDeviceInfo>
+#include <QMediaPlayer>
+#include <QTime>
 
-
-Audio::Audio(QWidget *parent) : QWidget(parent)
+// open a new file
+Audio::Audio(int sampleRate, int channelCount, QWidget *parent)
 {
-        destinationFile->setFileName("/tmp/test.raw");
-        destinationFile->open( QIODevice::WriteOnly | QIODevice::Truncate );
-
         QAudioFormat format;
         // Set up the desired format, for example:
-        format.setSampleRate(8000);
-        format.setChannelCount(1);
+        format.setSampleRate(sampleRate);
+        format.setChannelCount(channelCount);
         format.setSampleSize(8);
         format.setCodec("audio/pcm");
         format.setByteOrder(QAudioFormat::LittleEndian);
@@ -32,6 +31,31 @@ Audio::Audio(QWidget *parent) : QWidget(parent)
 
         audioInput = new QAudioInput(format, this);
         connect(audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+}
+
+// open an existed file
+Audio::Audio(int sampleRate, int channelCount, QString fileName, QWidget * parent) {
+
+    destinationFile->setFileName(fileName);
+    destinationFile->open(QIODevice::ReadWrite);
+
+    QAudioFormat format;
+    format.setSampleRate(sampleRate);
+    format.setChannelCount(channelCount);
+    format.setSampleSize(8);
+    format.setCodec("audio/pcm");
+    format.setByteOrder(QAudioFormat::LittleEndian);
+    format.setSampleType(QAudioFormat::UnSignedInt);
+
+    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
+    if (!info.isFormatSupported(format)) {
+        qWarning() << "Default format not supported, trying to use the nearest.";
+        format = info.nearestFormat(format);
+    }
+
+    audioInput = new QAudioInput(format, this);
+    connect(audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+
 }
 
 int Audio::getSampleRate()
@@ -55,31 +79,16 @@ qint64 Audio::getAudioDuration()
        return -1;
 }
 
-void Audio::audioOnPlay()
+void Audio::audioOnPlay(QString fileDir)
 {
-    destinationFile->open(QIODevice::ReadOnly);
-
-    // 设置播放音频格式;
-    format->setSampleRate(48000);
-    format->setChannelCount(1);
-    format->setSampleSize(8);
-    format->setCodec("audio/pcm");
-    // wav文件即按照这个字节存储顺序保存数据;
-    format->setByteOrder(QAudioFormat::LittleEndian);
-    format->setSampleType(QAudioFormat::UnSignedInt);
-
-    QAudioDeviceInfo info(QAudioDeviceInfo::defaultOutputDevice());
-    //qDebug() << info.supportedCodecs();
-    if (!info.isFormatSupported(*format))
-    {
-        qWarning() << "Raw audio format not supported by backend, cannot play audio.";
-        return;
-    }
+    QMediaPlayer *player = new QMediaPlayer();
+    player->setMedia(QUrl::fromLocalFile(fileDir));
+    player->setVolume(50);
+    player->play();
+    timer->start();
 
     audioOutput = new QAudioOutput(*format);
-//    connect(audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
-    audioOutput->start();
-    timer->start();
+    connect(audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
 }
 
 void Audio::handleStateChanged(QAudio::State state)
@@ -88,7 +97,6 @@ void Audio::handleStateChanged(QAudio::State state)
         case QAudio::IdleState:
             // Finished playing (no more data)
             qDebug() << "elapsedUSecs:" << audioOutput->elapsedUSecs();
-//            qDebug() << "time : " << timer->;  // record time now
             audioOnStop();
             break;
 
@@ -120,3 +128,7 @@ void Audio::readAudioFile(QString fileName)
     QFile *file = new QFile(fileName);
     destinationFile = file;
 }
+
+//void Audio::getAudioDuration(const qint64 &Position)
+//{
+//}

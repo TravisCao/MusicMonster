@@ -1,9 +1,10 @@
 #include "mainwindow.h"
 #include "newfiledialog.h"
 #include "ui_mainwindowForm.h"
-#include "readwav.h"
 #include "audio.h"
 #include "changefactor.h"
+
+#include <string>
 
 #include <QStandardItemModel>
 #include <QAbstractItemView>
@@ -64,33 +65,12 @@ QList<QString> *MainWindow::openFile()
                                  .arg(QDir::toNativeSeparators(fileName), file.errorString()));
             return &openedFileNames;
         }
-        string filenameString = fileName.toStdString();
-        QMediaPlayer *player = new QMediaPlayer();
-        player->setMedia(QUrl::fromLocalFile(fileName));
-        player->setVolume(50);
-        player->play();
-
         openedFileNames << fileName;
-        WavInFile *wavfile = new WavInFile(filenameString.data());
-        QString sampleRate(wavfile->getSampleRate());
-        QString channel(wavfile->getChannels());
-        QString bitBepth(wavfile->getBitsPerSample());
-        QString duration(wavfile->getLengthInMS());
-
-        QFileInfo info = QFileInfo(fileName);
-        QAudioFormat format;
-
-        QList<QStandardItem *> itemList;
-        struct FileWidget::fileItem item;
-
-        //waiting
-        QString name = info.fileName();
-        item.fileName = new QStandardItem(name);
-        item.bitDepth = new QStandardItem(bitBepth);
-        item.channels = new QStandardItem(channel);
-        item.duration = new QStandardItem(duration);
-        item.sampleRate = new QStandardItem(sampleRate);
-        fileWidget->addItem(item);
+//      QMediaPlayer *player = new QMediaPlayer();
+//      player->setMedia(QUrl::fromLocalFile(fileName));
+//      player->setVolume(50);
+//      player->play();
+        fileWidget->addItem(fileName);
     }
 
     qDebug() << "open";
@@ -112,16 +92,18 @@ void MainWindow::saveFile()
 
 void MainWindow::modelInit()
 {
+    // the headerview of the tabel to control the size of the section
     QHeaderView *verticalView = new QHeaderView(Qt::Vertical);
     QHeaderView *horizontalView = new QHeaderView(Qt::Horizontal);
-    uiMainWindow->tableView->setVerticalHeader(verticalView);
-    uiMainWindow->tableView->setHorizontalHeader(horizontalView);
     verticalView->setSectionResizeMode(QHeaderView::Fixed);
     verticalView->setDefaultSectionSize(10);
-    horizontalView->setDefaultSectionSize(180);
+    horizontalView->setSectionResizeMode(QHeaderView::ResizeToContents);
     horizontalView->setMaximumSectionSize(180);
+    uiMainWindow->tableView->setVerticalHeader(verticalView);
+    uiMainWindow->tableView->setHorizontalHeader(horizontalView);
 
     uiMainWindow->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    uiMainWindow->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     uiMainWindow->tableView->resizeColumnsToContents();
     uiMainWindow->tableView->setAlternatingRowColors(true);
     uiMainWindow->tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -141,7 +123,6 @@ void MainWindow::modelInit()
         historyModel->appendRow(item);
     }
 
-
 }
 
 void MainWindow::actionInit()
@@ -152,5 +133,3 @@ void MainWindow::actionInit()
     connect(uiMainWindow->actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
     connect(uiMainWindow->actionChangeFactor, SIGNAL(triggered()), this, SLOT(changeFactor()));
 }
-
-
