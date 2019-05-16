@@ -29,6 +29,7 @@ void FileWidget::modelInit(QTableView *table)
 
 void FileWidget::addItem(struct fileItem item)
 {
+
     QList<QStandardItem *> itemList;
     itemList.append(item.fileName);
     itemList.append(item.duration);

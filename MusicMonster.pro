@@ -32,7 +32,6 @@ SOURCES += \
     effecthistorywidget.cpp \
     filewidget.cpp \
     audio.cpp \
-    readwav.cpp \
     changefactor.cpp
 
 
@@ -42,7 +41,6 @@ HEADERS += \
     effecthistorywidget.h \
     filewidget.h \
     audio.h \
-    readwav.h \
     changefactor.h
 
 FORMS += \

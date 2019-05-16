@@ -21,6 +21,7 @@
 #include <QFileInfo>
 #include <QAudioFormat>
 #include <QAudioInput>
+#include <QHeaderView>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     uiMainWindow(new Ui::MainWindow)
@@ -111,6 +112,15 @@ void MainWindow::saveFile()
 
 void MainWindow::modelInit()
 {
+    QHeaderView *verticalView = new QHeaderView(Qt::Vertical);
+    QHeaderView *horizontalView = new QHeaderView(Qt::Horizontal);
+    uiMainWindow->tableView->setVerticalHeader(verticalView);
+    uiMainWindow->tableView->setHorizontalHeader(horizontalView);
+    verticalView->setSectionResizeMode(QHeaderView::Fixed);
+    verticalView->setDefaultSectionSize(10);
+    horizontalView->setDefaultSectionSize(180);
+    horizontalView->setMaximumSectionSize(180);
+
     uiMainWindow->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
     uiMainWindow->tableView->resizeColumnsToContents();
     uiMainWindow->tableView->setAlternatingRowColors(true);
@@ -122,11 +132,6 @@ void MainWindow::modelInit()
 
     effectModel = new QStandardItemModel(20,1);
     uiMainWindow->effectList->setModel(effectModel);
-
-    for (int i = 0; i < 20; ++i) {
-        QStandardItem *item = new QStandardItem();
-        effectModel->appendRow(item);
-    }
 
     historyModel = new QStandardItemModel(20,1);
     uiMainWindow->historyList->setModel(historyModel);
