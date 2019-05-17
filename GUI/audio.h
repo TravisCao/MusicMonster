@@ -22,7 +22,7 @@ class Audio : public QWidget
 
 public:
 
-    Audio(int sampleRate, int channelCount,QWidget *parent = nullptr); // new audio file
+    Audio(QWidget *parent = nullptr);
 
     Audio(int sampleRate, int channelCount, QString fileName, QWidget * parent = nullptr); // open an existed file
 
@@ -32,11 +32,16 @@ public:
 
 signals:
 
-    int musicStart();
+    void musicStart();
+
+    void positionChange(qint64 position);
+
 
 public slots:
 
     void playAndPause(int index);
+
+    void addToPlayList(QString fileName);
 
     QString getAudioDuration();
 
@@ -52,18 +57,19 @@ public slots:
 
     void volumeControl(int volume);
 
-    void positionUpdate(qint64 position, QSlider *slider, QLCDNumber *number);
-
     void record();
 
-    bool isPlayListEmpty();
+    void sliderChange(int position);
 
-    void sliderChange(int position, QLCDNumber *number);
+    void updateTimeNow(qint64 position);
 
-    void updateTimeNow(QLCDNumber *number, qint64 position);
+    void removeMusic(int index);
 
-private:
+    void updateDisplay();
 
+protected:
+
+    friend class MainWindow;
     QFile *destinationFile;
 
     bool recycleFlag;

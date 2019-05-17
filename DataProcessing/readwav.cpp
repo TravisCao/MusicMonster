@@ -368,7 +368,7 @@ int WavInFile::read()
 WavOutFile::WavOutFile(const char *fileName, MMbuffer<float> &buffer)
 {
     fptr = fopen(fileName, "wb");
-    if (fptr == NULL)
+    if (fptr == nullptr)
     {
         checkflag = 1;
     }
@@ -414,7 +414,7 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
     {
         fvalue = minval;
     }
-    return (int)fvalue;
+    return static_cast<int>(fvalue);
 }
 
 

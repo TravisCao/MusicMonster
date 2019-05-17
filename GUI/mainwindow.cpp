@@ -19,18 +19,27 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QMediaPlayer>
+#include <QMediaPlaylist>
 #include <QStringList>
 #include <QFileInfo>
 #include <QAudioFormat>
 #include <QAudioInput>
 #include <QHeaderView>
+#include <QModelIndex>
+#include <QTime>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     uiMainWindow(new Ui::MainWindow)
 {
     uiMainWindow->setupUi(this);
+    audio = new Audio(this);
+    fileWidget = new FileWidget(this);
+    uiMainWindow->timeNow->display("00:00");
+    uiMainWindow->timeTotal->display("00:00");
+
     modelInit();
-    actionInit();
+    connectionInit();
+    buttonInit();
 }
 
 MainWindow::~MainWindow()
@@ -66,12 +75,13 @@ QList<QString> *MainWindow::openFile()
                                  .arg(QDir::toNativeSeparators(fileName), file.errorString()));
             return &openedFileNames;
         }
+
         openedFileNames << fileName;
         fileWidget->addItem(fileName);
+        audio->addToPlayList(fileName);
     }
 
-//    audioInit();
-
+    buttonRecover();
     return &openedFileNames;
 }
 
@@ -89,10 +99,51 @@ void MainWindow::saveFile()
     qDebug() << "save";
 }
 
+void MainWindow::removeItemSender()
+{
+    QList<int> rows;
+    rows = fileWidget->getSelectedRows();
+    if (rows.isEmpty())
+        return;
+    else {
+        for (int i = 0; i < rows.size(); ++i) {
+            emit removeItem(rows.at(i));
+        }
+    }
+}
+
 void MainWindow::saveAsFile()
 {
     saveasFileDialog = new saveAsFileDialog(this);
     saveasFileDialog->show();
+}
+
+void MainWindow::musicSelected(const QModelIndex & index)
+{
+    qDebug() << index;
+}
+
+void MainWindow::musicPlay()
+{
+    qDebug() << "musicPlay Receive";
+    QList<int> musics;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    musics = fileWidget->getSelectedRows();
+    qDebug() << musics.first();
+    // if the user doesn't select any music files, press play button will make no difference
+    if (musics.isEmpty())
+        return;
+    // if the user selected multiple files to play, pick up the first music to play
+    if ( musics.size() > 1) {
+        int smallest = 1000;
+        for (int i = 0; i < musics.size(); ++i) {
+            if (musics.at(i) < smallest) smallest = musics.at(i);
+        }
+        emit playMusic(smallest);
+    }
+    else {
+        emit playMusic(musics.first());
+    }
 }
 
 void MainWindow::modelInit()
@@ -131,27 +182,107 @@ void MainWindow::modelInit()
 
 }
 
-void MainWindow::audioInit()
+
+void MainWindow::connectionInit()
 {
-   uiMainWindow->timeNow->display("00:00:000");
-   uiMainWindow->timeTotal->display("00:00");
 
-//   connect(uiMainWindow->timeNow, SIGNAL())
+    connect(uiMainWindow->actionNew, &QAction::triggered, this, &MainWindow::newFile);
+    connect(uiMainWindow->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
+    connect(uiMainWindow->actionAbout_Music_Mosnter, &QAction::triggered, this, &MainWindow::about);
+    connect(uiMainWindow->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
+    connect(uiMainWindow->actionChangeFactor, &QAction::triggered, this, &MainWindow::changeFactor);
+    connect(uiMainWindow->actionSave_As, &QAction::triggered, this, &MainWindow::saveAsFile);
+    connect(uiMainWindow->openButton, &QPushButton::pressed, this, &MainWindow::openFile);
+    connect(uiMainWindow->newButton, &QPushButton::pressed, this, &MainWindow::newFile);
+    connect(uiMainWindow->saveButton, &QPushButton::pressed, this, &MainWindow::saveFile);
+    connect(uiMainWindow->deleteButton, &QPushButton::pressed, this, &MainWindow::removeItemSender);
+    connect(this, &MainWindow::removeItem, fileWidget, &FileWidget::removeItem);
+    connect(this, &MainWindow::removeItem, audio, &Audio::removeMusic);
 
-//    connect(uiMainWindow->play, SIGNAL(triggered()), audio, SLOT(playAndPause())); connect(uiMainWindow->stop, SIGNAL(triggered()), audio, SLOT(musicStop()));
-//    connect(uiMainWindow->speed, SIGNAL(pressed()), audio , SLOT(musicSpeedUp()));
-//    connect(uiMainWindow->speed, SIGNAL(released()), audio, SLOT(musicRecoverSpeed()));
-//    connect(uiMainWindow->slow, SIGNAL(pressed()), audio, SLOT(musicSlowDown()));
-//    connect(uiMainWindow->slow, SIGNAL(released()), audio, SLOT(musicRecoverSpeed()));
+    connect(uiMainWindow->tableView, &QAbstractItemView::clicked, this, &MainWindow::musicSelected);
+
+
+    connect(uiMainWindow->play, &QPushButton::pressed, this, &MainWindow::musicPlay);
+    connect(uiMainWindow->play, &QPushButton::toggled, this, &MainWindow::changePlayIcon);
+    connect(this, &MainWindow::playMusic, audio, &Audio::playAndPause);
+
+    connect(uiMainWindow->stop, &QPushButton::pressed, audio, &Audio::musicStop);
+    connect(uiMainWindow->stop, &QPushButton::pressed, this, &MainWindow::playButtonChange);
+
+    connect(uiMainWindow->speed, &QPushButton::pressed, audio , &Audio::musicSpeedUp);
+
+    connect(uiMainWindow->speed, &QPushButton::released, audio, &Audio::musicRecoverSpeed);
+
+    connect(uiMainWindow->slow, &QPushButton::pressed, audio, &Audio::musicSlowDown);
+
+    connect(uiMainWindow->slow, &QPushButton::released, audio, &Audio::musicRecoverSpeed);
+
+    connect(audio, &Audio::positionChange, this, &MainWindow::changeSlider);
+    connect(uiMainWindow->slider, &QSlider::sliderMoved, audio, &Audio::sliderChange);
 
 }
 
-void MainWindow::actionInit()
+void MainWindow::buttonInit()
 {
-    connect(uiMainWindow->actionNew, SIGNAL(triggered()), this, SLOT(newFile()));
-    connect(uiMainWindow->actionOpen, SIGNAL(triggered()), this, SLOT(openFile()));
-    connect(uiMainWindow->actionAbout_Music_Mosnter, SIGNAL(triggered()), this, SLOT(about()));
-    connect(uiMainWindow->actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
-    connect(uiMainWindow->actionChangeFactor, SIGNAL(triggered()), this, SLOT(changeFactor()));
-    connect(uiMainWindow->actionSave_As, SIGNAL(triggered()), this, SLOT(saveAsFile()));
+    uiMainWindow->play->setEnabled(false);
+    uiMainWindow->stop->setEnabled(false);
+    uiMainWindow->speed->setEnabled(false);
+    uiMainWindow->slow->setEnabled(false);
+    uiMainWindow->playloop->setEnabled(false);
+    uiMainWindow->record->setEnabled(false);
 }
+
+void MainWindow::buttonRecover()
+{
+    uiMainWindow->play->setEnabled(true);
+    uiMainWindow->stop->setEnabled(true);
+    uiMainWindow->speed->setEnabled(true);
+    uiMainWindow->slow->setEnabled(true);
+    uiMainWindow->playloop->setEnabled(true);
+}
+
+void MainWindow::playButtonChange()
+{
+    uiMainWindow->play->setChecked(false);
+    changePlayIcon(false);
+}
+
+QString MainWindow::uintToQString(uint number)
+{
+
+   std::string string = to_string(number);
+   QString qString = QString(QString::fromLocal8Bit(string.c_str()));
+   return qString;
+
+}
+
+void MainWindow::changePlayIcon(bool flag)
+{
+    qDebug() << uiMainWindow->play->isChecked();
+    QIcon play, pause;
+    qDebug() << QDir::currentPath();
+    play.addFile(tr("/Users/travis/Documents/MusicMonster/icon/play.png"));
+    pause.addFile(tr("/Users/travis/Documents/MusicMonster/icon/pause.png"));
+    if (flag == false) {
+        uiMainWindow->play->setIcon(play);
+    }
+    else {
+        uiMainWindow->play->setIcon(pause);
+    }
+}
+
+void MainWindow::changeSlider(qint64 position)
+{
+    uiMainWindow->slider->setMaximum(static_cast<int>(audio->player->duration() / 1000));
+    uiMainWindow->slider->setValue(static_cast<int>(position / 1000));
+    int duration = static_cast<int>(audio->player->duration());
+    qDebug() << duration;
+    QTime timenow(0, (position / 60000) % 60, (position / 1000) % 60);
+    QTime timetotal(0, (duration / 60000) % 60, (duration / 1000) % 60);
+    QString timenowString = timenow.toString("mm:ss");
+    QString timetotalString = timetotal.toString("mm:ss");
+    uiMainWindow->timeNow->display(timenowString);
+    uiMainWindow->timeTotal->display(timetotalString);
+}
+
+

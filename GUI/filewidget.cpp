@@ -1,31 +1,42 @@
 #include "filewidget.h"
 #include "readwav.h"
+#include "audio.h"
 
 #include <string>
 #include <QWidget>
 #include <QTableView>
+#include <QTime>
 #include <QStandardItemModel>
 #include <QList>
 #include <QFileInfo>
+#include <QDebug>
+#include <QItemSelectionModel>
+#include <QMediaPlayer>
+#include <QUrl>
+#include <QCoreApplication>
+#include <QEventLoop>
+
 
 FileWidget::FileWidget(QWidget *parent) : QWidget(parent)
 {
-
+    fileModel = new QStandardItemModel(0, 5);
+    fileModel->setHorizontalHeaderLabels(QStringList() << "Name:" << "Duration" << "Sample Rates" << "Channels" << "Bit Depth");
 }
 
 
 void FileWidget::modelInit(QTableView *table)
 {
-    fileModel = new QStandardItemModel(0, 5);
-    fileModel->setHorizontalHeaderLabels(QStringList() << "Name:" << "Duration" << "Sample Rates" << "Channels" << "Bit Depth");
 
-    table->setModel(fileModel);
+   table->setModel(fileModel);
+   selectionModel = table->selectionModel();
 
     for (int i = 0; i < 10; ++i) {
         table->setRowHeight(i,10);
     }
 
     table->setShowGrid(false);
+
+    connectionInit();
 
 }
 
@@ -34,17 +45,25 @@ void FileWidget::addItem(QString fileName)
     std::string filenameString = fileName.toStdString();
     WavInFile *wavfile = new WavInFile(filenameString.data());
 
-//      QMediaPlayer *player = new QMediaPlayer();
-//      player->setMedia(QUrl::fromLocalFile(fileName));
-//      player->setVolume(50);
-//      player->play();
-
     QFileInfo info = QFileInfo(fileName);
     QString name = info.fileName();
     QString sampleRate = uintToQString(wavfile->getSampleRate());
     QString channel = uintToQString(wavfile->getChannels());
     QString bitBepth = uintToQString(wavfile->getBitsPerSample());
-    QString duration = QString::fromStdString(wavfile->getLengthInMS());
+
+    QMediaPlayer *player = new QMediaPlayer();
+    player->setMedia(QUrl::fromLocalFile(fileName));
+
+    // waiting for 200ms for loading duration of the file
+    // while continuing processing other events
+    QTime _Timer = QTime::currentTime().addMSecs(200);
+       while( QTime::currentTime() < _Timer )
+           QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+
+    int durationInt = static_cast<int>(player->duration());
+    QTime time(0, (durationInt / 60000) % 60, (durationInt / 1000) % 60);
+    QString duration = time.toString("hh:mm:ss");
+
 
     struct fileItem item;
 
@@ -80,6 +99,11 @@ void FileWidget::searchItem()
 
 }
 
+void FileWidget::connectionInit()
+{
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &FileWidget::debug);
+}
+
 QString FileWidget::uintToQString(uint number)
 {
 
@@ -87,5 +111,21 @@ QString FileWidget::uintToQString(uint number)
    QString qString = QString(QString::fromLocal8Bit(string.c_str()));
 
    return qString;
+}
+
+QList<int> FileWidget::getSelectedRows()
+{
+    qDebug() << "rows";
+    QList<int> rows;
+    for (int i = 0; i < selectionModel->selectedIndexes().size(); ++i) {
+        rows.append(selectionModel->selectedIndexes().at(i).row());
+        qDebug() << selectionModel->selectedIndexes().at(i).row();
+    }
+    return rows;
+}
+
+void FileWidget::debug(const QItemSelection &selected)
+{
+    qDebug() << selected.indexes().first().row();
 }
 

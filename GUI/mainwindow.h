@@ -10,6 +10,7 @@
 #include <QMainWindow>
 #include <QList>
 #include <QStandardItemModel>
+#include <QModelIndex>
 
 namespace Ui {
 
@@ -30,6 +31,13 @@ public:
 
     ~MainWindow();
 
+signals:
+
+    void removeItem(int index);
+    void playMusic(int index);
+    void changePosition(int position);
+    void stopMusic();
+
 public slots:
 
     void newFile();
@@ -42,27 +50,53 @@ public slots:
 
     void saveFile();
 
+    void removeItemSender();
+
     void saveAsFile();
+
+    void musicSelected(const QModelIndex & index);
+
+    void musicPlay();
+
+    QString uintToQString(uint number);
+
+    void changePlayIcon(bool flag);
+
+    void changeSlider(qint64 position);
+
 
 private:
 
     void modelInit();
 
-    void audioInit();
+    void connectionInit();
 
-    void actionInit();
+    void buttonInit();
+
+    void buttonRecover();
+
+    void playButtonChange();
 
 private:
 
-    QList<QString> openedFileNames;
     Audio *audio;
+
+    QList<QString> openedFileNames;
+
     saveAsFileDialog *saveasFileDialog;
+
     NewFileDialog *newFileDialog;
+
     FileWidget *fileWidget;
+
     Ui::MainWindow *uiMainWindow;
+
     Ui::Dialog *uiNewFileDialog;
+
     QStandardItemModel *fileModel;
+
     QStandardItemModel *effectModel;
+
     QStandardItemModel *historyModel;
 
 };

@@ -15,31 +15,21 @@
 #include <QTime>
 #include <QSlider>
 #include <QLCDNumber>
+#include <QDebug>
 
 // open a new file
-Audio::Audio(int sampleRate, int channelCount, QWidget *parent)
+Audio::Audio(QWidget *parent): QWidget(parent)
 {
+    player = new QMediaPlayer(this);
+    playList = new QMediaPlaylist;
     timer = new QTimer(this);
 
-    QAudioFormat format;
-    // Set up the desired format, for example:
-    format.setSampleRate(sampleRate);
-    format.setChannelCount(channelCount);
-    format.setSampleSize(8);
-    format.setCodec("audio/pcm");
-    format.setByteOrder(QAudioFormat::LittleEndian);
-    format.setSampleType(QAudioFormat::UnSignedInt);
-
-    QAudioDeviceInfo info = QAudioDeviceInfo::defaultInputDevice();
-    if (!info.isFormatSupported(format)) {
-        qWarning() << "Default format not supported, trying to use the nearest.";
-        format = info.nearestFormat(format);
-    }
-
+    connect(player, &QMediaPlayer::positionChanged, this, &Audio::updateDisplay);
 }
 
 // open an existed file
-Audio::Audio(int sampleRate, int channelCount, QString fileName, QWidget * parent) {
+Audio::Audio(int sampleRate, int channelCount, QString fileName, QWidget * parent) : QWidget(parent)
+{
 
     destinationFile->setFileName(fileName);
     destinationFile->open(QIODevice::ReadWrite);
@@ -81,8 +71,13 @@ int Audio::getChannelCount()
 
 void Audio::playAndPause(int index)
 {
-    // if the music index is the current index
-    // play or pause the music
+    qDebug() << "playReceived";
+//     if the music index is the current index
+//     play or pause the music
+    qDebug() << "list empty?" << playList->isEmpty();
+    qDebug() << "list currentIndex : " << playList->currentIndex();
+//    player->play();
+//    timer->start(1);
     if (index == playList->currentIndex()) {
         if (player->state() == QMediaPlayer::PlayingState) {
             player->pause();
@@ -103,10 +98,20 @@ void Audio::playAndPause(int index)
             player->setPosition(0); // play the music from the beginning
             player->play();
             timer->start(1);
-    //        connect();
+//            connect();
         }
     }
 
+}
+
+void Audio::addToPlayList(QString fileName)
+{
+    playList->addMedia(QUrl::fromLocalFile(fileName));
+    playList->setCurrentIndex(0);
+    playList->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    player->setPlaylist(playList);
+    qDebug() << playList->isEmpty();
+    qDebug() << playList->mediaCount();
 }
 
 QString Audio::getAudioDuration()
@@ -142,6 +147,7 @@ void Audio::musicSlowDown()
 
 void Audio::musicStop()
 {
+    qDebug() << "stop";
     player->setPosition(0);
     player->stop();
 }
@@ -151,38 +157,35 @@ void Audio::volumeControl(int volume)
     player->setVolume(volume);
 }
 
-void Audio::positionUpdate(qint64 position, QSlider *slider, QLCDNumber * number)
-{
-    slider->setMaximum(static_cast<int>((player->duration() / 1000)));
-    slider->setValue(static_cast<int>(position / 1000));
-    int move = static_cast<int>(position * 1000);
-    QTime timeMoved(0, (move / 60000) % 60, (move / 1000) % 60);
-    timeString = timeMoved.toString("mm:ss");
-    updateTimeNow(number, position);
-}
 
 void Audio::record()
 {
 
 }
 
-bool Audio::isPlayListEmpty()
-{
-    return true;
-}
-
-void Audio::sliderChange(int position, QLCDNumber * number)
+void Audio::sliderChange(int position)
 {
     player->setPosition(position * 1000);
     int move = position * 1000;
     QTime timeNow(0, (move / 60000) & 60, (move / 1000) % 60);
-    updateTimeNow(number, position);
+
+    emit positionChange(player->position());
 }
 
-void Audio::updateTimeNow(QLCDNumber *number, qint64 position)
+void Audio::updateTimeNow(qint64 position)
 {
     int move = static_cast<int>(position * 1000);
     QTime display(0, (move / 60000) % 60, (move / 1000) % 60, position % 1000);
     timeString = display.toString("mm:ss:zzz");
-    number->display(timeString);
+    //    number->display(timeString);
+}
+
+void Audio::removeMusic(int index)
+{
+    playList->removeMedia(index);
+}
+
+void Audio::updateDisplay()
+{
+    emit positionChange(player->position());
 }

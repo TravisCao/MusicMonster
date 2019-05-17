@@ -7,6 +7,8 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <QList>
+#include <QItemSelectionModel>
+#include <QModelIndexList>
 
 class FileWidget : public QWidget
 {
@@ -20,9 +22,11 @@ public:
 
     QString uintToQString(uint number);
 
-private slots:
+    QList<int> getSelectedRows();
 
-//    void infoUpdate();
+public slots:
+
+    void debug(const QItemSelection &selected);
 
 
 protected:
@@ -39,6 +43,8 @@ protected:
 
     QList<QString> openedFileNames;
 
+    QItemSelectionModel *selectionModel;
+
 private:
 
     friend class MainWindow;
@@ -48,6 +54,8 @@ private:
     void removeItem(int row);
 
     void searchItem();
+
+    void connectionInit();
 
 };
 
