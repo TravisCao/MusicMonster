@@ -27,29 +27,32 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-    DataProcessing/readwav.cpp \
     GUI/audio.cpp \
     GUI/changefactor.cpp \
     GUI/effecthistorywidget.cpp \
     GUI/filewidget.cpp \
     GUI/mainwindow.cpp \
-    GUI/newfiledialog.cpp
+    GUI/newfiledialog.cpp \
+    DataProcessing/readwav.cpp \
+    GUI/saveasfiledialog.cpp
 
 
 HEADERS += \
-    DataProcessing/readwav.h \
     GUI/audio.h \
     GUI/changefactor.h \
     GUI/effecthistorywidget.h \
     GUI/filewidget.h \
     GUI/mainwindow.h \
-    GUI/newfiledialog.h
+    GUI/newfiledialog.h \
+    DataProcessing/readwav.h \
+    GUI/saveasfiledialog.h
 
 FORMS += \
     GUI/newdialogForm.ui \
     GUI/mainwindowForm.ui \
     GUI/changefactordialog.ui \
-    GUI/effecthistorywidget.ui
+    GUI/effecthistorywidget.ui \
+    GUI/savefiledialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

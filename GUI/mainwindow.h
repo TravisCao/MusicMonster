@@ -5,6 +5,7 @@
 #include "newfiledialog.h"
 #include "changefactor.h"
 #include "audio.h"
+#include "saveasfiledialog.h"
 
 #include <QMainWindow>
 #include <QList>
@@ -41,6 +42,8 @@ public slots:
 
     void saveFile();
 
+    void saveAsFile();
+
 private:
 
     void modelInit();
@@ -53,6 +56,7 @@ private:
 
     QList<QString> openedFileNames;
     Audio *audio;
+    saveAsFileDialog *saveasFileDialog;
     NewFileDialog *newFileDialog;
     FileWidget *fileWidget;
     Ui::MainWindow *uiMainWindow;

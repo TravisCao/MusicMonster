@@ -654,7 +654,7 @@ QLabel
                       <number>5</number>
                      </property>
                      <item>
-                      <widget class="QPushButton" name="pushButton">
+                      <widget class="QPushButton" name="newButton">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -671,7 +671,7 @@ QLabel
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="pushButton_2">
+                      <widget class="QPushButton" name="saveButton">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>1</horstretch>
@@ -691,7 +691,7 @@ QLabel
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="pushButton_3">
+                      <widget class="QPushButton" name="openButton">
                        <property name="text">
                         <string/>
                        </property>
@@ -702,7 +702,7 @@ QLabel
                       </widget>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="pushButton_4">
+                      <widget class="QPushButton" name="deleteButton">
                        <property name="text">
                         <string/>
                        </property>
@@ -747,7 +747,7 @@ QLabel
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit">
+                    <widget class="QLineEdit" name="searchLine">
                      <property name="placeholderText">
                       <string/>
                      </property>

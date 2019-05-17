@@ -19,6 +19,7 @@ public:
     void dialogInit();
 
 private:
+
     Ui::changeDialog *ui;
 
 };

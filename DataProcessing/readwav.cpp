@@ -3,7 +3,6 @@
 #include <sstream>
 #include <stdio.h>
 #include "readwav.h"
-#include <QDebug>
 using namespace std;
 
 static const char riffStr[] = "RIFF";
@@ -56,12 +55,12 @@ int WavInFile::checkFormat() {
 }
 
 int WavInFile::readRIFF() {
-    if (fread(&(riff.Riff), sizeof(riff.Riff), 1, fptr) != 1) return -1;
-    if (fread(&(riff.lenAll), sizeof(riff.lenAll), 1, fptr) != 1) return -1;
-    if (fread(&(riff.Wave), sizeof(riff.Wave), 1, fptr) != 1) return -1;
+    if (fread(&(buffer.riff.Riff), sizeof(buffer.riff.Riff), 1, fptr) != 1) return -1;
+    if (fread(&(buffer.riff.lenAll), sizeof(buffer.riff.lenAll), 1, fptr) != 1) return -1;
+    if (fread(&(buffer.riff.Wave), sizeof(buffer.riff.Wave), 1, fptr) != 1) return -1;
 
-    if (memcmp(riffStr, riff.Riff, 4) != 0) return -1;
-    if (memcmp(waveStr, riff.Wave, 4) != 0) return -1;
+    if (memcmp(riffStr, buffer.riff.Riff, 4) != 0) return -1;
+    if (memcmp(waveStr, buffer.riff.Wave, 4) != 0) return -1;
 
     return 0;
 }
@@ -78,24 +77,24 @@ int WavInFile::readHeader() {
         int nLen, nDiffer;
 
         //store the format sign in the fmtSign.
-        memcpy(format.fmtSign, fmtStr, 4);
+        memcpy(buffer.format.fmtSign, fmtStr, 4);
 
         // read length of the format field
         if (fread(&nLen, sizeof(int), 1, fptr) != 1) return -1;
 
         // check if the length of the format field is right.
-        nDiffer = nLen - (static_cast<int>(sizeof(format)) - 8);
+        nDiffer = nLen - (static_cast<int>(sizeof(buffer.format)) - 8);
         if ((nLen < 0) || (nDiffer < 0)) return -1;
 
-        format.lenFormat = nLen;
+        buffer.format.lenFormat = nLen;
 
         // read data
-        if (fread(&(format.type), sizeof(uint16_t), 1, fptr) != 1) return -1;
-        if (fread(&(format.ChannelNum), sizeof(uint16_t), 1, fptr) != 1) return -1;
-        if (fread(&(format.SampleRate), sizeof(uint32_t), 1, fptr) != 1) return -1;
-        if (fread(&(format.ByteRate), sizeof(uint32_t), 1, fptr) != 1) return -1;
-        if (fread(&(format.BlockAlign), sizeof(uint16_t), 1, fptr) != 1) return -1;
-        if (fread(&(format.BitsPerSample), sizeof(uint16_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.format.type), sizeof(uint16_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.format.ChannelNum), sizeof(uint16_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.format.SampleRate), sizeof(uint32_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.format.ByteRate), sizeof(uint32_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.format.BlockAlign), sizeof(uint16_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.format.BitsPerSample), sizeof(uint16_t), 1, fptr) != 1) return -1;
 
 
         // if format_len is larger than expected, skip the extra data
@@ -112,20 +111,20 @@ int WavInFile::readHeader() {
     {
         int nLen, nDiffer;
 
-        memcpy(fact.factSign, factStr, 4);
+        memcpy(buffer.fact.factSign, factStr, 4);
 
         // read length of the fact field
         if (fread(&nLen, sizeof(uint32_t), 1, fptr) != 1) return -1;
 
 
         // check the length of fact field is right.
-        nDiffer = nLen - (static_cast<int>(sizeof(fact)) - 8);
+        nDiffer = nLen - (static_cast<int>(sizeof(buffer.fact)) - 8);
         if ((nLen < 0) || (nDiffer < 0)) return -1;
 
-        fact.lenFact = nLen;
+        buffer.fact.lenFact = nLen;
 
         // read data
-        if (fread(&(fact.factSamplelen), sizeof(uint32_t), 1, fptr) != 1) return -1;
+        if (fread(&(buffer.fact.factSamplelen), sizeof(uint32_t), 1, fptr) != 1) return -1;
 
 
         if (nDiffer > 0)
@@ -140,8 +139,8 @@ int WavInFile::readHeader() {
     // data block
     else if (strcmp(label, dataStr) == 0)
     {
-        memcpy(data.dataSign, dataStr, 4);
-        if (fread(&(data.lenData), sizeof(uint), 1, fptr) != 1) return -1;
+        memcpy(buffer.data.dataSign, dataStr, 4);
+        if (fread(&(buffer.data.lenData), sizeof(uint), 1, fptr) != 1) return -1;
 
         return 1;
     }
@@ -164,10 +163,10 @@ int WavInFile::readHeader() {
 
 
 int WavInFile::checkParameter() {
-    if ((format.ChannelNum < 1)  || (format.ChannelNum > 9) ||
-            (format.SampleRate < 4000)  || (format.SampleRate > 192000) ||
-            (format.BlockAlign < 1) || (format.BlockAlign > 320) ||
-            (format.BitsPerSample < 8) || (format.BitsPerSample > 32)) {
+    if ((buffer.format.ChannelNum < 1)  || (buffer.format.ChannelNum > 9) ||
+            (buffer.format.SampleRate < 4000)  || (buffer.format.SampleRate > 192000) ||
+            (buffer.format.BlockAlign < 1) || (buffer.format.BlockAlign > 320) ||
+            (buffer.format.BitsPerSample < 8) || (buffer.format.BitsPerSample > 32)) {
         return -1;
     }
     return 0;
@@ -181,30 +180,30 @@ void WavInFile::rewind() {
 
 // if reach the end of file, return 1; otherwise,return 0.
 int WavInFile::eof() {
-     return (dataRead == riff.lenAll || feof(fptr));
+     return (dataRead == buffer.riff.lenAll || feof(fptr));
 }
 
 uint WavInFile::getSampleRate() const
 {
-    return format.SampleRate;
+    return buffer.format.SampleRate;
 }
 
 uint WavInFile::getBitsPerSample() const
 {
-    return format.BitsPerSample;
+    return buffer.format.BitsPerSample;
 }
 
 // get the sizes of the data in bytes.
 uint WavInFile::getlenS3InBytes() const
 {
-    return data.lenData;
+    return buffer.data.lenData;
 }
 
 uint WavInFile::getNumSamples() const
 {
-    if (format.BlockAlign == 0) return 0;
-    if (format.type > 1) return fact.factSamplelen;
-    return data.lenData / static_cast<uint16_t>(format.BlockAlign);
+    if (buffer.format.BlockAlign == 0) return 0;
+    if (buffer.format.type > 1) return buffer.fact.factSamplelen;
+    return buffer.data.lenData / static_cast<uint16_t>(buffer.format.BlockAlign);
 }
 
 uint WavInFile::getBytesPerSample() const
@@ -214,17 +213,17 @@ uint WavInFile::getBytesPerSample() const
 
 uint WavInFile::getByteRate() const
 {
-    return format.ByteRate;
+    return buffer.format.ByteRate;
 }
 
 uint WavInFile::getChannels() const
 {
-    return format.ChannelNum;
+    return buffer.format.ChannelNum;
 }
 
 string WavInFile::getLengthInMS() const
 {
-    uint timeInMS;
+    uint timeInMS, ms;
     string s, min, h;
     string time;
     double numSamples;
@@ -233,16 +232,19 @@ string WavInFile::getLengthInMS() const
     numSamples = static_cast<double>(getNumSamples());
     sampleRate = static_cast<double>(getSampleRate());
     timeInMS = static_cast<uint>(1000.0 * numSamples / sampleRate + 0.5);
-
-
-    s = to_string((timeInMS / 1000) % 60);
-    min = to_string((timeInMS / 60000) % 60);
-    h = to_string((timeInMS / 3600000) % 60);
-
-    if (h.size() < 2) h = "0" + h;
-    if (min.size() < 2) min = "0" + min;
-    if (s.size() < 2) s = "0" + s;
-
+    ms = timeInMS%1000;
+    timeInMS = timeInMS/1000;
+    if (timeInMS%1000 < 10) {
+        s = "0"+to_string(timeInMS%1000);
+    }
+    timeInMS = timeInMS/1000;
+    if (timeInMS%1000 < 10) {
+        min = "0"+to_string(timeInMS%1000);
+    }
+    timeInMS = timeInMS/1000;
+    if (timeInMS%1000 < 10) {
+        h = "0"+to_string(timeInMS%1000);
+    }
     time = h+":"+min+":"+s;
     return time;
 }
@@ -250,107 +252,108 @@ string WavInFile::getLengthInMS() const
 /// Returns how many milliseconds of audio have so far been read from the file
 uint WavInFile::getElapsedMS() const
 {
-    return static_cast<uint>(1000.0 * static_cast<double>(dataRead) / static_cast<double>(format.ByteRate));
+    return static_cast<uint>(1000.0 * static_cast<double>(dataRead) / static_cast<double>(buffer.format.ByteRate));
 }
 
 /*----------------------------------------------------------------------------------------------------------
  * ---------------------------------------------------------------------------------------------------------
  */
 
-/// Read data in float format. Notice that when reading in float format
-/// 8/16/24/32 bit sample formats are supported
-//int WavInFile::read(float *buffer, int maxElems)
-//{
-//    unsigned int afterDataRead;
-//    int numBytes;
-//    int numElems;
-//    int bytesPerSample;
+// Read data in float format. Notice that when reading in float format
+// 8/16/24/32 bit sample formats are supported
+int WavInFile::read()
+{
+    unsigned int afterDataRead;
+    int maxElems = buffer.getDataNum();
+    int numBytes;
+    int numElems;
+    int bytesPerSample;
 
-//    //assert(buffer);
+    buffer.initializeData();
+    bytesPerSample = buffer.format.BitsPerSample / 8;
+    if ((bytesPerSample < 1) || (bytesPerSample > 4))
+    {
+        stringstream ss;
+        ss << "\nOnly 8/16/24/32 bit sample WAV files supported. Can't open WAV file with ";
+        ss << static_cast<int>(buffer.format.BitsPerSample);
+        ss << " bit sample format. ";
+        //error(ss.str().c_str());
+    }
 
-//    bytesPerSample = format.BitsPerSample / 8;
-//    if ((bytesPerSample < 1) || (bytesPerSample > 4))
-//    {
-//        stringstream ss;
-//        ss << "\nOnly 8/16/24/32 bit sample WAV files supported. Can't open WAV file with ";
-//        ss << static_cast<int>(format.BitsPerSample);
-//        ss << " bit sample format. ";
-//        //error(ss.str().c_str());
-//    }
+    numBytes = maxElems * bytesPerSample;
+    afterDataRead = dataRead + numBytes;
+    if (afterDataRead > buffer.data.lenData)
+    {
+        // Don't read more samples than are marked available in header
+        numBytes = (int)buffer.data.lenData - (int)dataRead;
+        //assert(numBytes >= 0);
+    }
 
-//    numBytes = maxElems * bytesPerSample;
-//    afterDataRead = dataRead + numBytes;
-//    if (afterDataRead > data.lenData)
-//    {
-//        // Don't read more samples than are marked available in header
-//        numBytes = (int)data.lenData - (int)dataRead;
-//        assert(numBytes >= 0);
-//    }
+    // read raw data into temporary buffer
+    int convBuffSize = (numBytes + 15) & -8;
+    char *temp = new char[convBuffSize];
+    numBytes = static_cast<int>(fread(temp, 1, numBytes, fptr));
+    dataRead += numBytes;
 
-//    // read raw data into temporary buffer
-//    char *temp = (char*)getConvBuffer(numBytes);
-//    numBytes = static_cast<int>(fread(temp, 1, numBytes, fptr));
-//    dataRead += numBytes;
+    numElems = numBytes / bytesPerSample;
 
-//    numElems = numBytes / bytesPerSample;
+    // swap byte ordert & convert to float, depending on sample format
+    switch (bytesPerSample)
+    {
+        case 1:
+        {
+            unsigned char *temp2 = (unsigned char*)temp;
+            double conv = 1.0 / 128.0;
+            for (int i = 0; i < numElems; i ++)
+            {
+                buffer.pData[i] = (float)(temp2[i] * conv - 1.0);
+            }
+            break;
+        }
 
-//    // swap byte ordert & convert to float, depending on sample format
-//    switch (bytesPerSample)
-//    {
-//        case 1:
-//        {
-//            unsigned char *temp2 = (unsigned char*)temp;
-//            double conv = 1.0 / 128.0;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                buffer[i] = (float)(temp2[i] * conv - 1.0);
-//            }
-//            break;
-//        }
+        case 2:
+        {
+            short *temp2 = (short*)temp;
+            double conv = 1.0 / 32768.0;
+            for (int i = 0; i < numElems; i ++)
+            {
+                short value = temp2[i];
+                buffer.pData[i] = (float)(value * conv);
+            }
+            break;
+        }
 
-//        case 2:
-//        {
-//            short *temp2 = (short*)temp;
-//            double conv = 1.0 / 32768.0;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                short value = temp2[i];
-//                buffer[i] = (float)(value * conv);
-//            }
-//            break;
-//        }
+        case 3:
+        {
+            char *temp2 = (char *)temp;
+            double conv = 1.0 / 8388608.0;
+            for (int i = 0; i < numElems; i ++)
+            {
+                int value = *((int*)temp2);
+                value = value & 0x00ffffff;             // take 24 bits
+                value |= (value & 0x00800000) ? 0xff000000 : 0;  // extend minus sign bits
+                buffer.pData[i] = (float)(value * conv);
+                temp2 += 3;
+            }
+            break;
+        }
 
-//        case 3:
-//        {
-//            char *temp2 = (char *)temp;
-//            double conv = 1.0 / 8388608.0;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                int value = *((int*)temp2);
-//                value = value & 0x00ffffff;             // take 24 bits
-//                value |= (value & 0x00800000) ? 0xff000000 : 0;  // extend minus sign bits
-//                buffer[i] = (float)(value * conv);
-//                temp2 += 3;
-//            }
-//            break;
-//        }
+        case 4:
+        {
+            int *temp2 = (int *)temp;
+            double conv = 1.0 / 2147483648.0;
+            assert(sizeof(int) == 4);
+            for (int i = 0; i < numElems; i ++)
+            {
+                int value = temp2[i];
+                buffer.pData[i] = (float)(value * conv);
+            }
+            break;
+        }
+    }
 
-//        case 4:
-//        {
-//            int *temp2 = (int *)temp;
-//            double conv = 1.0 / 2147483648.0;
-//            assert(sizeof(int) == 4);
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                int value = temp2[i];
-//                buffer[i] = (float)(value * conv);
-//            }
-//            break;
-//        }
-//    }
-
-//    return numElems;
-//}
+    return numElems;
+}
 
 
 
@@ -362,67 +365,44 @@ uint WavInFile::getElapsedMS() const
  * --------------------------------------------------------------------------------------------------
  */
 
-WavOutFile::WavOutFile(const char *fileName, int sampleRate, int bits, int channels)
+WavOutFile::WavOutFile(const char *fileName, MMbuffer<float> &buffer)
 {
-    bytesWritten = 0;
     fptr = fopen(fileName, "wb");
     if (fptr == NULL)
     {
-        string msg = "Error : Unable to open file \"";
-        msg += fileName;
-        msg += "\" for writing.";
-        //pmsg = msg.c_str;
-        //error(msg.c_str());
+        checkflag = 1;
     }
-
-    writeBaseHeader(sampleRate, bits, channels);
-
+    writeBaseHeader(buffer);
+    write(buffer);
 }
 
 WavOutFile::~WavOutFile()
 {
-    finishHeader();
     if (fptr) fclose(fptr);
     fptr = NULL;
 }
 
 
-void WavOutFile::writeBaseHeader(const uint sampleRate, const uint bits, const uint channels)
+void WavOutFile::writeBaseHeader(const MMbuffer<float> &buffer)
 {
-    memcpy(&(riff.Riff), riffStr, 4);
-    // length of whole file unknown
-    // copy string 'WAVE' to wave
-    memcpy(&(riff.Wave), waveStr, 4);
+    fwrite(&(buffer.riff), sizeof (buffer.riff), 1, fptr) == 1;
+    if(fwrite(&(buffer.format),sizeof (buffer.format),1,fptr)) {
+        cout<< "success2"<<endl;
+    };
+    if(buffer.fact.factSign == factStr){
+        fwrite(&(buffer.fact),sizeof (buffer.fact),1,fptr);
 
-    // fill in the 'format' part..
-    memcpy(&(format.fmtSign), fmtStr, 4);
-    format.lenFormat = 0x10;
-    format.type = 1;
-    format.ChannelNum = static_cast<uint16_t>(channels);
-    format.SampleRate = static_cast<uint32_t>(sampleRate);
-    format.BitsPerSample = static_cast<uint16_t>(bits);
-    format.BlockAlign = static_cast<uint16_t>(bits * channels / 8); //byte per sample???
-    format.ByteRate = format.BlockAlign * static_cast<uint32_t>(sampleRate);
-
-    // fill in the 'fact' part...
-    memcpy(&(fact.factSign), factStr, 4);
-    fact.lenFact = 4;
-    //fact sample length unknown
-
-    // fill in the 'data' part..
-
-    // copy string 'data' to data_field
-    memcpy(&(data.dataSign), dataStr, 4);
-    // data length unknown
+    }
+    fwrite(&(buffer.data),sizeof (buffer.data),1,fptr);
 }
 
-void WavOutFile::finishHeader()
-{
-    // supplement the length of whole file, data length and fact sample length in the header.
-    riff.lenAll = static_cast<uint32_t>(bytesWritten) + sizeof(WavFormat) + sizeof(WavFact) + sizeof(WavData) + 4;
-    data.lenData = static_cast<uint32_t>(bytesWritten);
-    fact.factSamplelen = static_cast<uint32_t>(bytesWritten) / format.BlockAlign;
-}
+//void WavOutFile::finishHeader()
+//{
+//    // supplement the length of whole file, data length and fact sample length in the header.
+//    riff.lenAll = static_cast<uint32_t>(bytesWritten) + sizeof(WavFormat) + sizeof(WavFact) + sizeof(WavData) + 4;
+//    data.lenData = static_cast<uint32_t>(bytesWritten);
+//    fact.factSamplelen = static_cast<uint32_t>(bytesWritten) / format.BlockAlign;
+//}
 
 int WavOutFile::saturate(float fvalue, float minval, float maxval)
 {
@@ -438,73 +418,74 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
 }
 
 
-//void WavOutFile::write(const float *buffer, int numElems)
-//{
-//    int numBytes;
-//    int bytesPerSample;
+void WavOutFile::write( MMbuffer<float> &buffer)
+{
+    int numBytes;
+    int bytesPerSample;
+    int numElems = buffer.getDataNum();
+    const float *dataBuffer = buffer.pData;
+    if (numElems == 0) return;
 
-//    if (numElems == 0) return;
+    bytesPerSample = buffer.format.BitsPerSample / 8;
+    numBytes = numElems * bytesPerSample;
+    int convBuffSize = numBytes + 7;
+    char *temp = new char[convBuffSize]; // round bit up to avoid buffer overrun with 24bit-value assignment
 
-//    bytesPerSample = format.BitsPerSample / 8;
-//    numBytes = numElems * bytesPerSample;
-//    void *temp = getConvBuffer(numBytes + 7);   // round bit up to avoid buffer overrun with 24bit-value assignment
+    switch (bytesPerSample)
+    {
+        case 1:
+        {
+            unsigned char *temp2 = (unsigned char*) temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                temp2[i] = (unsigned char)saturate(dataBuffer[i] * 128.0f + 128.0f, 0.0f, 255.0f);
+            }
+            break;
+        }
 
-//    switch (bytesPerSample)
-//    {
-//        case 1:
-//        {
-//            unsigned char *temp2 = (unsigned char *)temp;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                temp2[i] = (unsigned char)saturate(buffer[i] * 128.0f + 128.0f, 0.0f, 255.0f);
-//            }
-//            break;
-//        }
+        case 2:
+        {
+            short *temp2 = (short*) temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                short value = (short)saturate(dataBuffer[i] * 32768.0f, -32768.0f, 32767.0f);
+                temp2[i] = value;
+            }
+            break;
+        }
 
-//        case 2:
-//        {
-//            short *temp2 = (short *)temp;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                short value = (short)saturate(buffer[i] * 32768.0f, -32768.0f, 32767.0f);
-//                temp2[i] = value;
-//            }
-//            break;
-//        }
+        case 3:
+        {
+            char *temp2 = (char*) temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                int value = saturate(dataBuffer[i] * 8388608.0f, -8388608.0f, 8388607.0f);
+                *((int*)temp2) = value;
+                temp2 += 3;
+            }
+            break;
+        }
 
-//        case 3:
-//        {
-//            char *temp2 = (char *)temp;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                int value = saturate(buffer[i] * 8388608.0f, -8388608.0f, 8388607.0f);
-//                *((int*)temp2) = value;
-//                temp2 += 3;
-//            }
-//            break;
-//        }
+        case 4:
+        {
+            int *temp2 = (int*) temp;
+            for (int i = 0; i < numElems; i ++)
+            {
+                int value = saturate(dataBuffer[i] * 2147483648.0f, -2147483648.0f, 2147483647.0f);
+                temp2[i] = value;
+            }
+            break;
+        }
 
-//        case 4:
-//        {
-//            int *temp2 = (int *)temp;
-//            for (int i = 0; i < numElems; i ++)
-//            {
-//                int value = saturate(buffer[i] * 2147483648.0f, -2147483648.0f, 2147483647.0f);
-//                temp2[i] = value;
-//            }
-//            break;
-//        }
+    }
+    int res = (int)fwrite(temp, 1, numBytes, fptr);
 
-//    }
-
-//    int res = (int)fwrite(temp, 1, numBytes, fptr);
-
-//    if (res != numBytes)
-//    {
-//        error("Error while writing to a wav file.");
-//    }
-//    bytesWritten += numBytes;
-//}
+    if (res != numBytes)
+    {
+        checkflag = 1;
+    }
+    delete[] temp;
+}
 
 
 

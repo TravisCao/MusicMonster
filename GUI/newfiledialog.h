@@ -28,6 +28,7 @@ private slots:
 
 private:
     Ui::newDialog *ui;
+
 };
 
 #endif // NEWFILEDIALOG_H

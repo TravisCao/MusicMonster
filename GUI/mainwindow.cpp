@@ -3,6 +3,7 @@
 #include "ui_mainwindowForm.h"
 #include "audio.h"
 #include "changefactor.h"
+#include "readwav.h"
 
 #include <string>
 
@@ -84,7 +85,14 @@ void MainWindow::about()
 
 void MainWindow::saveFile()
 {
+
     qDebug() << "save";
+}
+
+void MainWindow::saveAsFile()
+{
+    saveasFileDialog = new saveAsFileDialog(this);
+    saveasFileDialog->show();
 }
 
 void MainWindow::modelInit()
@@ -145,4 +153,5 @@ void MainWindow::actionInit()
     connect(uiMainWindow->actionAbout_Music_Mosnter, SIGNAL(triggered()), this, SLOT(about()));
     connect(uiMainWindow->actionSave, SIGNAL(triggered()), this, SLOT(saveFile()));
     connect(uiMainWindow->actionChangeFactor, SIGNAL(triggered()), this, SLOT(changeFactor()));
+    connect(uiMainWindow->actionSave_As, SIGNAL(triggered()), this, SLOT(saveAsFile()));
 }
