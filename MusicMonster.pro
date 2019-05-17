@@ -49,8 +49,7 @@ FORMS += \
     GUI/newdialogForm.ui \
     GUI/mainwindowForm.ui \
     GUI/changefactordialog.ui \
-    GUI/effecthistorywidget.ui \
-    GUI/form.ui
+    GUI/effecthistorywidget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

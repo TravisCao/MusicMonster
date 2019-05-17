@@ -69,6 +69,8 @@ QList<QString> *MainWindow::openFile()
         fileWidget->addItem(fileName);
     }
 
+//    audioInit();
+
     return &openedFileNames;
 }
 
@@ -105,6 +107,7 @@ void MainWindow::modelInit()
     uiMainWindow->tableView->setStyleSheet("QTableView::item { \
                                                height: 10px; \
                                                }");
+
     fileWidget->modelInit(uiMainWindow->tableView);
 
     effectModel = new QStandardItemModel(20,1);
@@ -117,6 +120,21 @@ void MainWindow::modelInit()
         QStandardItem *item = new QStandardItem();
         historyModel->appendRow(item);
     }
+
+}
+
+void MainWindow::audioInit()
+{
+   uiMainWindow->timeNow->display("00:00:000");
+   uiMainWindow->timeTotal->display("00:00");
+
+//   connect(uiMainWindow->timeNow, SIGNAL())
+
+//    connect(uiMainWindow->play, SIGNAL(triggered()), audio, SLOT(playAndPause())); connect(uiMainWindow->stop, SIGNAL(triggered()), audio, SLOT(musicStop()));
+//    connect(uiMainWindow->speed, SIGNAL(pressed()), audio , SLOT(musicSpeedUp()));
+//    connect(uiMainWindow->speed, SIGNAL(released()), audio, SLOT(musicRecoverSpeed()));
+//    connect(uiMainWindow->slow, SIGNAL(pressed()), audio, SLOT(musicSlowDown()));
+//    connect(uiMainWindow->slow, SIGNAL(released()), audio, SLOT(musicRecoverSpeed()));
 
 }
 

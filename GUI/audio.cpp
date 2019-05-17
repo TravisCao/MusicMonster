@@ -13,6 +13,8 @@
 #include <QAudioDeviceInfo>
 #include <QMediaPlayer>
 #include <QTime>
+#include <QSlider>
+#include <QLCDNumber>
 
 // open a new file
 Audio::Audio(int sampleRate, int channelCount, QWidget *parent)
@@ -88,8 +90,7 @@ void Audio::playAndPause(int index)
         }
         else {
             player->play();
-//            timer->start(1000);
-    //        connect();
+            timer->start(1);
         }
     }
     else {
@@ -101,15 +102,18 @@ void Audio::playAndPause(int index)
         else { // if the music is not playing now
             player->setPosition(0); // play the music from the beginning
             player->play();
-//            timer->start(1000);
+            timer->start(1);
     //        connect();
         }
     }
 
 }
 
-QString Audio::getAudioDuration(qint64 position)
+QString Audio::getAudioDuration()
 {
+    int move = static_cast<int>(player->duration());
+    QTime duration(0, (move / 60000) % 60, (move / 1000) % 60);
+    timeString = duration.toString("mm:ss");
     return timeString;
 }
 
@@ -124,6 +128,11 @@ void Audio::musicRecycle(bool flag)
 void Audio::musicSpeedUp()
 {
     player->setPlaybackRate(1.2);
+}
+
+void Audio::musicRecoverSpeed()
+{
+   player->setPlaybackRate(1);
 }
 
 void Audio::musicSlowDown()
@@ -142,10 +151,14 @@ void Audio::volumeControl(int volume)
     player->setVolume(volume);
 }
 
-void Audio::positionUpdate(qint64 position)
+void Audio::positionUpdate(qint64 position, QSlider *slider, QLCDNumber * number)
 {
-    QTime timeMoved(0, (position * 1000 / 60000) % 60, (position * 1000 / 1000) % 60);
+    slider->setMaximum(static_cast<int>((player->duration() / 1000)));
+    slider->setValue(static_cast<int>(position / 1000));
+    int move = static_cast<int>(position * 1000);
+    QTime timeMoved(0, (move / 60000) % 60, (move / 1000) % 60);
     timeString = timeMoved.toString("mm:ss");
+    updateTimeNow(number, position);
 }
 
 void Audio::record()
@@ -156,4 +169,20 @@ void Audio::record()
 bool Audio::isPlayListEmpty()
 {
     return true;
+}
+
+void Audio::sliderChange(int position, QLCDNumber * number)
+{
+    player->setPosition(position * 1000);
+    int move = position * 1000;
+    QTime timeNow(0, (move / 60000) & 60, (move / 1000) % 60);
+    updateTimeNow(number, position);
+}
+
+void Audio::updateTimeNow(QLCDNumber *number, qint64 position)
+{
+    int move = static_cast<int>(position * 1000);
+    QTime display(0, (move / 60000) % 60, (move / 1000) % 60, position % 1000);
+    timeString = display.toString("mm:ss:zzz");
+    number->display(timeString);
 }

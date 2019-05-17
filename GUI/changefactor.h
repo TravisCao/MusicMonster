@@ -10,14 +10,13 @@ namespace Ui {
 
 class ChangeFactor : public QDialog
 {
-
     Q_OBJECT
 
 public:
 
     ChangeFactor(QWidget *parent = nullptr);
-    void dialogInit();
 
+    void dialogInit();
 
 private:
     Ui::changeDialog *ui;

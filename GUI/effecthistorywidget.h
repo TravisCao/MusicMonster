@@ -8,7 +8,9 @@
 class effectHistoryWidget : public QWidget
 {
     Q_OBJECT
+
 public:
+
     explicit effectHistoryWidget(QWidget *parent = nullptr);
 
 signals:

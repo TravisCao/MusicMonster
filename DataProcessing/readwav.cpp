@@ -234,14 +234,10 @@ string WavInFile::getLengthInMS() const
     sampleRate = static_cast<double>(getSampleRate());
     timeInMS = static_cast<uint>(1000.0 * numSamples / sampleRate + 0.5);
 
-    qDebug() << QString::fromStdString(to_string(timeInMS));
 
     s = to_string((timeInMS / 1000) % 60);
-    qDebug() << QString::fromStdString(s);
     min = to_string((timeInMS / 60000) % 60);
-    qDebug() << QString::fromStdString(min);
     h = to_string((timeInMS / 3600000) % 60);
-    qDebug() << QString::fromStdString(h);
 
     if (h.size() < 2) h = "0" + h;
     if (min.size() < 2) min = "0" + min;
