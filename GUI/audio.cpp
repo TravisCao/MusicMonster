@@ -1,6 +1,8 @@
 #include "audio.h"
 
 #include <QAudioInput>
+#include <QAudioEncoderSettings>
+#include <QAudioRecorder>
 #include <QAudioFormat>
 #include <QAudioOutput>
 #include <QFile>
@@ -108,7 +110,7 @@ void Audio::addToPlayList(QString fileName)
 {
     playList->addMedia(QUrl::fromLocalFile(fileName));
     playList->setCurrentIndex(0);
-    playList->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    playList->setPlaybackMode(QMediaPlaylist::CurrentItemOnce);
     player->setPlaylist(playList);
     qDebug() << playList->isEmpty();
     qDebug() << playList->mediaCount();
@@ -158,9 +160,34 @@ void Audio::volumeControl(int volume)
 }
 
 
-void Audio::record()
+void Audio::record(bool flag)
 {
 
+    if (flag == true) {
+        recorder = new QAudioRecorder;
+
+        QAudioEncoderSettings audioSettings;
+        audioSettings.setCodec("audio/amr");
+        audioSettings.setQuality(QMultimedia::HighQuality);
+
+        recorder->setEncodingSettings(audioSettings);
+
+        recorder->setOutputLocation(QUrl::fromLocalFile("record.amr"));
+        recorder->record();
+        qDebug() << "recording begin";
+    }
+    else {
+        recorder->stop();
+        qDebug() << "recording end";
+    }
+
+}
+
+void Audio::stop_record()
+{
+    recorder->stop();
+
+    qDebug() << "stop recording";
 }
 
 void Audio::sliderChange(int position)

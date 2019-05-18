@@ -12,6 +12,8 @@ saveAsFileDialog::saveAsFileDialog(QWidget *parent) : QDialog(parent), ui(new Ui
 {
     ui->setupUi(this);
     dialogInit();
+
+    connect(ui->browse,&QPushButton::clicked, this, &saveAsFileDialog::getLocation);
 }
 
 void saveAsFileDialog::dialogInit()
@@ -19,33 +21,22 @@ void saveAsFileDialog::dialogInit()
     ui->locationEdit->setPlaceholderText(QDir::currentPath());
 }
 
-QString saveAsFileDialog::getLocation()
-{
-    return fileLocation;
-}
-
 QString saveAsFileDialog::getName()
 {
-    qDebug() << "location(get):" << location;
+    qDebug() << "location(get):" << this-> fileLocation;
     fileName = fileLocation + "/" + ui->nameEdit->text();
-    qDebug() << "fileLocation: " << fileLocation;
-    qDebug() << "text: " << ui->nameEdit->text();
-    qDebug() << "fileName(get): " << fileName;
     return fileName;
 }
 
-
-void saveAsFileDialog::on_browse_clicked()
+void saveAsFileDialog::getLocation()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                     "/home",
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
     ui->locationEdit->setText(dir);
-    fileLocation = dir;
-    location = dir;
+    this->fileLocation = dir;
     qDebug() << "fileLocation(click): " << fileLocation;
-    qDebug() << "location(click):" << location;
-    fileName = fileLocation + "/" + "11.wav";
-    qDebug() << "fileName(click):" << fileName;
+    qDebug() << getName();
+
 }

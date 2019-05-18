@@ -129,8 +129,6 @@ QString FileWidget::uintToQString(uint number)
 QList<int> FileWidget::getSelectedRows()
 {
     QList<int> rows;
-    qDebug() << selectionModel->currentIndex();
-    qDebug() << selectionModel->selectedIndexes().size() / 5;
     for (int i = 0; i < selectionModel->selectedIndexes().size() / 5 ; ++i) {
         rows.append(selectionModel->selectedIndexes().at(i).row());
     }

@@ -15,6 +15,7 @@
 #include <QPoint>
 #include <QSlider>
 #include <QLCDNumber>
+#include <QAudioRecorder>
 
 class Audio : public QWidget
 {
@@ -57,7 +58,9 @@ public slots:
 
     void volumeControl(int volume);
 
-    void record();
+    void record(bool flag);
+
+    void stop_record();
 
     void sliderChange(int position);
 
@@ -70,7 +73,12 @@ public slots:
 protected:
 
     friend class MainWindow;
+
+    QAudioRecorder *recorder;
+
     QFile *destinationFile;
+
+    QFile *record_output;
 
     bool recycleFlag;
 

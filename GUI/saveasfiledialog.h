@@ -17,21 +17,18 @@ class saveAsFileDialog : public QDialog
 public:
     saveAsFileDialog(QWidget *parent = nullptr);
     void dialogInit();
-    QString getLocation();
     QString getName();
 
 signals:
 
 public slots:
-
-private slots:
-    void on_browse_clicked();
+    void getLocation();
 
 private:
+
     Ui::saveAsDialog *ui;
     QString fileName;
     QString fileLocation;
-    QString location;
 
 };
 

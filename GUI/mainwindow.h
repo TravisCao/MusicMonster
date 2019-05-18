@@ -56,13 +56,17 @@ public slots:
 
     void saveAsFile();
 
-    void musicSelected(const QModelIndex & index);
+    void showSaveAsFile();
 
     void musicPlay();
 
     QString uintToQString(uint number);
 
-    void changePlayIcon(bool flag);
+    void togglePlayButton(bool flag);
+
+    void togglePlayloopButton(bool flag);
+
+    void toggleRecordButton(bool flag);
 
     void changeSlider(qint64 position);
 

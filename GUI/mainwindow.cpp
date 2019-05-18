@@ -132,20 +132,20 @@ void MainWindow::removeItemSender()
     QList<int> rows;
     if (!fileWidget->selectionModel->hasSelection()) return;
     rows = fileWidget->getSelectedRows();
-    if (rows.isEmpty())
+    qDebug() << "rows(to be removed): " << rows;
+    fileWidget->selectionModel->reset();
+    if (fileWidget->fileList.isEmpty())
         return;
     else {
         for (int i = 0; i < rows.size(); ++i) {
+            qDebug() << "removeItemAtRow: 0 ";
             emit removeItem(rows.at(i));
         }
-    }
+        }
 }
 
 void MainWindow::saveAsFile()
 {
-    saveasFileDialog = new saveAsFileDialog(this);
-    saveasFileDialog->show();
-
     qDebug() << "saveAsFile";
 
     QList<int> rows;
@@ -171,9 +171,10 @@ void MainWindow::saveAsFile()
     }
 }
 
-void MainWindow::musicSelected(const QModelIndex & index)
+void MainWindow::showSaveAsFile()
 {
-    qDebug() << index;
+   saveasFileDialog->show();
+
 }
 
 void MainWindow::musicPlay()
@@ -245,9 +246,17 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
     connect(uiMainWindow->actionChangeFactor, &QAction::triggered, this, &MainWindow::changeFactor);
 
-    connect(uiMainWindow->actionSave_As, &QAction::triggered, saveasFileDialog, &saveAsFileDialog::show);
+
+
+    connect(uiMainWindow->actionSave_As, &QAction::triggered, this, &MainWindow::showSaveAsFile);
 
     connect(saveasFileDialog, &saveAsFileDialog::accepted, this, &MainWindow::saveAsFile);
+
+    connect(uiMainWindow->record, &QPushButton::toggled, audio, &Audio::record);
+    connect(uiMainWindow->record, &QPushButton::toggled, this, &MainWindow::toggleRecordButton);
+
+    connect(uiMainWindow->playloop, &QPushButton::toggled, audio, &Audio::musicRecycle);
+    connect(uiMainWindow->playloop, &QPushButton::toggled, this, &MainWindow::togglePlayloopButton);
 
     connect(uiMainWindow->openButton, &QPushButton::pressed, this, &MainWindow::openFile);
     connect(uiMainWindow->newButton, &QPushButton::pressed, this, &MainWindow::newFile);
@@ -256,11 +265,8 @@ void MainWindow::connectionInit()
     connect(this, &MainWindow::removeItem, fileWidget, &FileWidget::removeItem);
     connect(this, &MainWindow::removeItem, audio, &Audio::removeMusic);
 
-    connect(uiMainWindow->tableView, &QAbstractItemView::clicked, this, &MainWindow::musicSelected);
-
-
     connect(uiMainWindow->play, &QPushButton::pressed, this, &MainWindow::musicPlay);
-    connect(uiMainWindow->play, &QPushButton::toggled, this, &MainWindow::changePlayIcon);
+    connect(uiMainWindow->play, &QPushButton::toggled, this, &MainWindow::togglePlayButton);
     connect(this, &MainWindow::playMusic, audio, &Audio::playAndPause);
 
     connect(uiMainWindow->stop, &QPushButton::pressed, audio, &Audio::musicStop);
@@ -285,8 +291,6 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionHighShelf, &QAction::triggered, filterDialog_6, &FilterDialog::showHighLowShelf);
     connect(uiMainWindow->actionLowShelf, &QAction::triggered, filterDialog_7, &FilterDialog::showHighLowShelf);
 
-
-
 }
 
 void MainWindow::buttonInit()
@@ -296,7 +300,6 @@ void MainWindow::buttonInit()
     uiMainWindow->speed->setEnabled(false);
     uiMainWindow->slow->setEnabled(false);
     uiMainWindow->playloop->setEnabled(false);
-    uiMainWindow->record->setEnabled(false);
 }
 
 void MainWindow::buttonRecover()
@@ -311,7 +314,7 @@ void MainWindow::buttonRecover()
 void MainWindow::playButtonChange()
 {
     uiMainWindow->play->setChecked(false);
-    changePlayIcon(false);
+    togglePlayButton(false);
 }
 
 QString MainWindow::uintToQString(uint number)
@@ -323,7 +326,7 @@ QString MainWindow::uintToQString(uint number)
 
 }
 
-void MainWindow::changePlayIcon(bool flag)
+void MainWindow::togglePlayButton(bool flag)
 {
     qDebug() << uiMainWindow->play->isChecked();
     QIcon play, pause;
@@ -336,6 +339,27 @@ void MainWindow::changePlayIcon(bool flag)
     else {
         uiMainWindow->play->setIcon(pause);
     }
+}
+
+void MainWindow::togglePlayloopButton(bool flag)
+{
+   QIcon playloop, playloopStop;
+   playloop.addFile(tr("/Users/travis/Documents/MusicMonster/icon/playloop.png"));
+   playloopStop.addFile(tr("/Users/travis/Documents/MusicMonster/icon/playLoopToggle.png"));
+
+   if (flag == false) uiMainWindow->playloop->setIcon(playloop);
+   else uiMainWindow->playloop->setIcon(playloopStop);
+}
+
+void MainWindow::toggleRecordButton(bool flag)
+{
+   QIcon record, stop_record;
+   record.addFile(tr("/Users/travis/Documents/MusicMonster/icon/record.png"));
+   stop_record.addFile(tr("/Users/travis/Documents/MusicMonster/icon/recordToggle.png"));
+
+   if (flag == false) uiMainWindow->record->setIcon(record);
+   else uiMainWindow->record->setIcon(stop_record);
+
 }
 
 void MainWindow::changeSlider(qint64 position)

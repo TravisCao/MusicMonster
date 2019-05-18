@@ -30,7 +30,6 @@ SOURCES += \
         main.cpp \
     GUI/audio.cpp \
     GUI/changefactor.cpp \
-    GUI/effecthistorywidget.cpp \
     GUI/filewidget.cpp \
     GUI/mainwindow.cpp \
     GUI/newfiledialog.cpp \
@@ -46,7 +45,6 @@ SOURCES += \
 HEADERS += \
     GUI/audio.h \
     GUI/changefactor.h \
-    GUI/effecthistorywidget.h \
     GUI/filewidget.h \
     GUI/mainwindow.h \
     GUI/newfiledialog.h \
@@ -63,7 +61,6 @@ FORMS += \
     GUI/newdialogForm.ui \
     GUI/mainwindowForm.ui \
     GUI/changefactordialog.ui \
-    GUI/effecthistorywidget.ui \
     GUI/savefiledialog.ui \
     GUI/filterhighlowpassdialog.ui \
     GUI/bandnotchdialog.ui \

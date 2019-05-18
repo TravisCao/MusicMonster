@@ -20,5 +20,7 @@
         <file>icon/waveform!.png</file>
         <file>icon/speed.png</file>
         <file>icon/slow.png</file>
+        <file>icon/playLoopToggle.png</file>
+        <file>icon/recordToggle.png</file>
     </qresource>
 </RCC>
