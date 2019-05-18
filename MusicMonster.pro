@@ -34,7 +34,12 @@ SOURCES += \
     GUI/mainwindow.cpp \
     GUI/newfiledialog.cpp \
     DataProcessing/readwav.cpp \
-    GUI/saveasfiledialog.cpp
+    GUI/saveasfiledialog.cpp \
+    Filter/decon.cpp \
+    Filter/filter.cpp \
+    Filter/WavIO.cpp \
+    Filter/cell.cpp \
+    GUI/filterdialog.cpp
 
 
 HEADERS += \
@@ -45,14 +50,22 @@ HEADERS += \
     GUI/mainwindow.h \
     GUI/newfiledialog.h \
     DataProcessing/readwav.h \
-    GUI/saveasfiledialog.h
+    GUI/saveasfiledialog.h \
+    Filter/filter.h \
+    Filter/wavio.h \
+    Filter/cell.h \
+    Filter/decon.h \
+    GUI/filterdialog.h
 
 FORMS += \
     GUI/newdialogForm.ui \
     GUI/mainwindowForm.ui \
     GUI/changefactordialog.ui \
     GUI/effecthistorywidget.ui \
-    GUI/savefiledialog.ui
+    GUI/savefiledialog.ui \
+    GUI/filterhighlowpassdialog.ui \
+    GUI/bandnotchdialog.ui \
+    GUI/highlowshelfdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

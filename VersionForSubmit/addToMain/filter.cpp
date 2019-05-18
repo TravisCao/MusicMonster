@@ -31,7 +31,7 @@ using namespace std;
 //Filters:
 //      lowpass     低通滤波器 低于设定的频率会被通过，高于设定的频率会被cutoff
 //      highpass    高通滤波器 高于设定的频率会被通过，低于设定的频率会被cutoff
-//      bandpass    带通滤波器 允许通过一定范围内的频率， 其余呗cutoff
+//      bandpass    带通滤波器 允许通过一定范围内的频率， 其余被cutoff
 //      notch       带阻滤波器 不允许通过一定范围内的频率， 其余被保留
 //      peaking     峰值滤波器 对特定区域的频率进行加强或者减弱
 //      lowshelf    低架滤波器 对特定区域之下的频率加强或者减弱
