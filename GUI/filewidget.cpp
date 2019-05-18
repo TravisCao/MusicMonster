@@ -21,6 +21,7 @@ FileWidget::FileWidget(QWidget *parent) : QWidget(parent)
 {
     fileModel = new QStandardItemModel(0, 5);
     fileModel->setHorizontalHeaderLabels(QStringList() << "Name:" << "Duration" << "Sample Rates" << "Channels" << "Bit Depth");
+
 }
 
 
@@ -45,6 +46,8 @@ void FileWidget::addItem(QString fileName)
     std::string filenameString = fileName.toStdString();
     WavInFile *wavfile = new WavInFile(filenameString.data());
 
+    MMbuffer<float> *buffer = &(wavfile->buffer);
+
     QFileInfo info = QFileInfo(fileName);
     QString name = info.fileName();
     QString sampleRate = uintToQString(wavfile->getSampleRate());
@@ -56,7 +59,7 @@ void FileWidget::addItem(QString fileName)
 
     // waiting for 200ms for loading duration of the file
     // while continuing processing other events
-    QTime _Timer = QTime::currentTime().addMSecs(200);
+    QTime _Timer = QTime::currentTime().addMSecs(300);
        while( QTime::currentTime() < _Timer )
            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
 
@@ -64,6 +67,12 @@ void FileWidget::addItem(QString fileName)
     QTime time(0, (durationInt / 60000) % 60, (durationInt / 1000) % 60);
     QString duration = time.toString("hh:mm:ss");
 
+    int fontSize = fontMetrics().width(name);
+
+    if (fontSize >= 150) {
+        name = fontMetrics().elidedText(name, Qt::ElideMiddle, 150);
+    }
+    qDebug() << name;
 
     struct fileItem item;
 
@@ -72,6 +81,10 @@ void FileWidget::addItem(QString fileName)
     item.channels = new QStandardItem(channel);
     item.duration = new QStandardItem(duration);
     item.sampleRate = new QStandardItem(sampleRate);
+    item.bufferList.append(buffer);
+    item.bufferIndex = 0;
+
+    fileList.append(item);
 
     item.fileName->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     item.bitDepth->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -115,12 +128,13 @@ QString FileWidget::uintToQString(uint number)
 
 QList<int> FileWidget::getSelectedRows()
 {
-    qDebug() << "rows";
     QList<int> rows;
-    for (int i = 0; i < selectionModel->selectedIndexes().size(); ++i) {
+    qDebug() << selectionModel->currentIndex();
+    qDebug() << selectionModel->selectedIndexes().size() / 5;
+    for (int i = 0; i < selectionModel->selectedIndexes().size() / 5 ; ++i) {
         rows.append(selectionModel->selectedIndexes().at(i).row());
-        qDebug() << selectionModel->selectedIndexes().at(i).row();
     }
+    qDebug() << "Select rows: " << rows;
     return rows;
 }
 

@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QDialog>
+#include <QString>
+#include <QDir>
 
 namespace Ui {
     class saveAsDialog;
@@ -27,6 +29,9 @@ private slots:
 
 private:
     Ui::saveAsDialog *ui;
+    QString fileName;
+    QString fileLocation;
+    QString location;
 
 };
 

@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = MusicMonster
 TEMPLATE = app
-ICON = /Users/travis/Documents/MusicMonster/Icon.icns
+ICON =  final.icns
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -56,7 +56,8 @@ HEADERS += \
     Filter/wavio.h \
     Filter/cell.h \
     Filter/decon.h \
-    GUI/filterdialog.h
+    GUI/filterdialog.h \
+    DataProcessing/mmrate.h
 
 FORMS += \
     GUI/newdialogForm.ui \
@@ -84,4 +85,3 @@ RESOURCES += \
 SUBDIRS += \
     MusicMonster.pro
 
-ICON = /Users/travis/Documents/MusicMonster/Icon.icns

@@ -5,6 +5,7 @@
 #include "changefactor.h"
 #include "readwav.h"
 #include "filterdialog.h"
+#include "saveasfiledialog.h"
 
 #include <string>
 
@@ -32,10 +33,12 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     uiMainWindow(new Ui::MainWindow)
 {
+
     uiMainWindow->setupUi(this);
 
     audio = new Audio(this);
     fileWidget = new FileWidget(this);
+    saveasFileDialog = new saveAsFileDialog(this);
 
     filterDialog_1 = new FilterDialog(this);
     filterDialog_2 = new FilterDialog(this);
@@ -47,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     uiMainWindow->timeNow->display("00:00");
     uiMainWindow->timeTotal->display("00:00");
+
+    bufferIndex = -1;
 
     modelInit();
     connectionInit();
@@ -106,6 +111,18 @@ void MainWindow::about()
 
 void MainWindow::saveFile()
 {
+    QList<int> rows;
+    qDebug() << "saveFile";
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    qDebug() << "rows:" << rows;
+    for (int i = 0; i < rows.size(); ++i) {
+        std::string fileNameString = openedFileNames.at(i).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(i).bufferList;
+        int bufferIndex = fileWidget->fileList.at(i).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+        WavOutFile outFile(fileNameString.data(), *buffer); //  save file
+    }
 
     qDebug() << "save";
 }
@@ -113,6 +130,7 @@ void MainWindow::saveFile()
 void MainWindow::removeItemSender()
 {
     QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
     rows = fileWidget->getSelectedRows();
     if (rows.isEmpty())
         return;
@@ -127,6 +145,30 @@ void MainWindow::saveAsFile()
 {
     saveasFileDialog = new saveAsFileDialog(this);
     saveasFileDialog->show();
+
+    qDebug() << "saveAsFile";
+
+    QList<int> rows;
+    std::string fileName = saveasFileDialog->getName().toStdString();
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    qDebug() << "saveAsFile";
+    qDebug() << "size: " << rows.size();
+    if (rows.size() == 1) {
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+        qDebug() << "name: " << QString::fromStdString(fileName);
+        WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
+    }
+    else {
+        for (int i = 0; i < rows.size(); ++i) {
+            QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(i)).bufferList;
+            int bufferIndex = fileWidget->fileList.at(rows.at(i)).bufferIndex;
+            MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+            WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
+        }
+    }
 }
 
 void MainWindow::musicSelected(const QModelIndex & index)
@@ -202,7 +244,11 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionAbout_Music_Mosnter, &QAction::triggered, this, &MainWindow::about);
     connect(uiMainWindow->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
     connect(uiMainWindow->actionChangeFactor, &QAction::triggered, this, &MainWindow::changeFactor);
-    connect(uiMainWindow->actionSave_As, &QAction::triggered, this, &MainWindow::saveAsFile);
+
+    connect(uiMainWindow->actionSave_As, &QAction::triggered, saveasFileDialog, &saveAsFileDialog::show);
+
+    connect(saveasFileDialog, &saveAsFileDialog::accepted, this, &MainWindow::saveAsFile);
+
     connect(uiMainWindow->openButton, &QPushButton::pressed, this, &MainWindow::openFile);
     connect(uiMainWindow->newButton, &QPushButton::pressed, this, &MainWindow::newFile);
     connect(uiMainWindow->saveButton, &QPushButton::pressed, this, &MainWindow::saveFile);
@@ -238,6 +284,7 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionPeaking, &QAction::triggered, filterDialog_5, &FilterDialog::showHighLowShelf);
     connect(uiMainWindow->actionHighShelf, &QAction::triggered, filterDialog_6, &FilterDialog::showHighLowShelf);
     connect(uiMainWindow->actionLowShelf, &QAction::triggered, filterDialog_7, &FilterDialog::showHighLowShelf);
+
 
 
 }
@@ -296,7 +343,6 @@ void MainWindow::changeSlider(qint64 position)
     uiMainWindow->slider->setMaximum(static_cast<int>(audio->player->duration() / 1000));
     uiMainWindow->slider->setValue(static_cast<int>(position / 1000));
     int duration = static_cast<int>(audio->player->duration());
-    qDebug() << duration;
     QTime timenow(0, (position / 60000) % 60, (position / 1000) % 60);
     QTime timetotal(0, (duration / 60000) % 60, (duration / 1000) % 60);
     QString timenowString = timenow.toString("mm:ss");

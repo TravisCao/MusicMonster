@@ -6,6 +6,12 @@
 #include <stdio.h>
 using namespace std;
 
+static const char riffStr[] = "RIFF";
+static const char waveStr[] = "WAVE";
+static const char fmtStr[]  = "fmt ";
+static const char factStr[] = "fact";
+static const char dataStr[] = "data";
+
 /// data structure of the file.
 struct WavRiff {
     char Riff[4];
@@ -113,6 +119,8 @@ public:
     void calByteRate();
 
     void calBlockAlign();
+
+    void writeTags();
 
 
     WavRiff riff;
@@ -256,7 +264,7 @@ int MMbuffer<ValueType>::getDataNum() {
 template <typename ValueType>
 int MMbuffer<ValueType>::getSampleNum(){
     sampleNum = getDataNum();
-    if (format.ChannelNum == 1) sampleNum = sampleNum/2;
+    if (format.ChannelNum == 2) sampleNum = sampleNum/2;
     return sampleNum;
 }
 
@@ -279,6 +287,14 @@ void MMbuffer<ValueType>::calByteRate(){
 template <typename ValueType>
 void MMbuffer<ValueType>::calBlockAlign(){
     format.BlockAlign = format.ChannelNum * format.BitsPerSample / 8;
+}
+
+template <typename ValueType>
+void MMbuffer<ValueType>::writeTags(){
+    riff.Riff = riffStr;
+    riff.Wave = waveStr;
+    format.fmtSign = fmtStr;
+    data.dataSign = dataStr;
 }
 
 class WavInFile
@@ -370,7 +386,7 @@ public:
 
 
     /// Fills in WAV file header information.
-    void writeBaseHeader(const MMbuffer<float> &buffer);
+    void writeBaseHeader(MMbuffer<float> &buffer);
 
     /// Finishes the WAV file header after we get the length of data.
 //    void finishHeader();

@@ -1,6 +1,8 @@
 #ifndef FILEWIDGET_H
 #define FILEWIDGET_H
 
+#include "readwav.h"
+
 #include <QWidget>
 #include <QTableView>
 #include <QString>
@@ -37,6 +39,8 @@ protected:
         QStandardItem *sampleRate;
         QStandardItem *channels;
         QStandardItem *bitDepth;
+        QList<MMbuffer<float>*> bufferList;
+        int bufferIndex;
     };
 
     QStandardItemModel *fileModel;
@@ -44,6 +48,8 @@ protected:
     QList<QString> openedFileNames;
 
     QItemSelectionModel *selectionModel;
+
+    QList<fileItem> fileList;
 
 private:
 

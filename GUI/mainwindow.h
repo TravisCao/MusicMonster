@@ -7,6 +7,7 @@
 #include "audio.h"
 #include "saveasfiledialog.h"
 #include "filterdialog.h"
+#include "saveasfiledialog.h"
 
 #include <QMainWindow>
 #include <QList>
@@ -78,6 +79,8 @@ private:
     void playButtonChange();
 
 private:
+
+    int bufferIndex;
 
     Audio *audio;
 
