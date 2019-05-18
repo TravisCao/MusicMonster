@@ -6,6 +6,7 @@
 #include "changefactor.h"
 #include "audio.h"
 #include "saveasfiledialog.h"
+#include "filterdialog.h"
 
 #include <QMainWindow>
 #include <QList>
@@ -64,7 +65,6 @@ public slots:
 
     void changeSlider(qint64 position);
 
-
 private:
 
     void modelInit();
@@ -84,6 +84,20 @@ private:
     QList<QString> openedFileNames;
 
     saveAsFileDialog *saveasFileDialog;
+
+    FilterDialog *filterDialog_1;
+
+    FilterDialog *filterDialog_2;
+
+    FilterDialog *filterDialog_3;
+
+    FilterDialog *filterDialog_4;
+
+    FilterDialog *filterDialog_5;
+
+    FilterDialog *filterDialog_6;
+
+    FilterDialog *filterDialog_7;
 
     NewFileDialog *newFileDialog;
 

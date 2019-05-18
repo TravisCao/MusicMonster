@@ -4,6 +4,7 @@
 #include "audio.h"
 #include "changefactor.h"
 #include "readwav.h"
+#include "filterdialog.h"
 
 #include <string>
 
@@ -32,8 +33,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     uiMainWindow(new Ui::MainWindow)
 {
     uiMainWindow->setupUi(this);
+
     audio = new Audio(this);
     fileWidget = new FileWidget(this);
+
+    filterDialog_1 = new FilterDialog(this);
+    filterDialog_2 = new FilterDialog(this);
+    filterDialog_3 = new FilterDialog(this);
+    filterDialog_4 = new FilterDialog(this);
+    filterDialog_5 = new FilterDialog(this);
+    filterDialog_6 = new FilterDialog(this);
+    filterDialog_7 = new FilterDialog(this);
+
     uiMainWindow->timeNow->display("00:00");
     uiMainWindow->timeTotal->display("00:00");
 
@@ -219,6 +230,15 @@ void MainWindow::connectionInit()
 
     connect(audio, &Audio::positionChange, this, &MainWindow::changeSlider);
     connect(uiMainWindow->slider, &QSlider::sliderMoved, audio, &Audio::sliderChange);
+
+    connect(uiMainWindow->actionHighPass, &QAction::triggered, filterDialog_1, &FilterDialog::showHighLowPass);
+    connect(uiMainWindow->actionLowPass, &QAction::triggered, filterDialog_2, &FilterDialog::showHighLowPass);
+    connect(uiMainWindow->actionNotch, &QAction::triggered, filterDialog_3, &FilterDialog::showBandNotch);
+    connect(uiMainWindow->actionBandPass, &QAction::triggered, filterDialog_4, &FilterDialog::showBandNotch);
+    connect(uiMainWindow->actionPeaking, &QAction::triggered, filterDialog_5, &FilterDialog::showHighLowShelf);
+    connect(uiMainWindow->actionHighShelf, &QAction::triggered, filterDialog_6, &FilterDialog::showHighLowShelf);
+    connect(uiMainWindow->actionLowShelf, &QAction::triggered, filterDialog_7, &FilterDialog::showHighLowShelf);
+
 
 }
 
