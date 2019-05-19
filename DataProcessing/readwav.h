@@ -122,6 +122,11 @@ public:
 
     void writeTags();
 
+    ValueType findPeak();
+
+    ValueType getCurrent(int timeInMs);
+
+    ValueType findMinPeak();
 
     WavRiff riff;
     WavFormat format;
@@ -296,6 +301,34 @@ void MMbuffer<ValueType>::writeTags(){
     format.fmtSign = fmtStr;
     data.dataSign = dataStr;
 }
+
+template <typename ValueType>
+ValueType MMbuffer<ValueType>::findPeak(){
+    ValueType max = pData[0];
+    for (int i = 1; i < getDataNum(); i++){
+        if (pData[i] > max) max = pData[i];
+    }
+    return max*10000;
+}
+
+template <typename ValueType>
+ValueType MMbuffer<ValueType>::getCurrent(int timeInMs){
+    int current = timeInMs * format.SampleRate / 1000;
+    if (getChannelNum() == 2){
+        current = pData[2*current] > pData[2*current+1] ? current*2 : current*2+1;
+    }
+    return pData[current] * 10000;
+}
+
+template <typename ValueType>
+ValueType MMbuffer<ValueType>::findMinPeak() {
+    ValueType min = pData[0];
+    for (int i = 1; i < getDataNum(); i++){
+        if (pData[i] < min) min = pData[i];
+    }
+    return min*10000;
+}
+
 
 class WavInFile
 {

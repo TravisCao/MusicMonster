@@ -7,6 +7,9 @@
 #include "saveasfiledialog.h"
 #include "filterdialog.h"
 #include "saveasfiledialog.h"
+#include "playbackdialog.h"
+#include "changepitch.h"
+#include "changerate1.h"
 
 #include <QMainWindow>
 #include <QList>
@@ -51,6 +54,12 @@ public slots:
 
     void removeItemSender();
 
+    void playback();
+
+    void changeRate();
+
+    void changePitch();
+
     void saveAsFile();
 
     void showSaveAsFile();
@@ -66,6 +75,8 @@ public slots:
     void toggleRecordButton(bool flag);
 
     void changeSlider(qint64 position);
+
+    void changeVolumeBar(int value);
 
 private:
 
@@ -84,6 +95,12 @@ private:
     int bufferIndex;
 
     Audio *audio;
+
+    playbackDialog *playbackdialog;
+
+    changepitch *changePitchDialog;
+
+    ChangeRate1 *changeRateDialog;
 
     QList<QString> openedFileNames;
 

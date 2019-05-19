@@ -669,7 +669,7 @@ QLabel
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset resource="../images.qrc">
+                        <iconset>
                          <normaloff>:/icon/openFile.jpg</normaloff>:/icon/openFile.jpg</iconset>
                        </property>
                       </widget>
@@ -689,7 +689,7 @@ QLabel
                         <string notr="true"/>
                        </property>
                        <property name="icon">
-                        <iconset resource="../images.qrc">
+                        <iconset>
                          <normaloff>:/icon/newFile.jpg</normaloff>:/icon/newFile.jpg</iconset>
                        </property>
                       </widget>
@@ -700,7 +700,7 @@ QLabel
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset resource="../images.qrc">
+                        <iconset>
                          <normaloff>:/icon/importFile.jpg</normaloff>:/icon/importFile.jpg</iconset>
                        </property>
                       </widget>
@@ -711,7 +711,7 @@ QLabel
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset resource="../images.qrc">
+                        <iconset>
                          <normaloff>:/icon/delete.jpg</normaloff>:/icon/delete.jpg</iconset>
                        </property>
                        <property name="iconSize">
@@ -907,7 +907,7 @@ QWidget#mainWidget:item:hover
               <string/>
              </property>
              <property name="icon">
-              <iconset resource="../images.qrc">
+              <iconset>
                <normaloff>:/icon/waveform!.png</normaloff>:/icon/waveform!.png</iconset>
              </property>
              <property name="iconSize">
@@ -1029,7 +1029,7 @@ QWidget#mainWidget:item:hover
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../images.qrc">
+               <iconset>
                 <normaloff>:/icon/playloop.png</normaloff>:/icon/playloop.png</iconset>
               </property>
               <property name="iconSize">
@@ -1055,7 +1055,7 @@ QWidget#mainWidget:item:hover
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../images.qrc">
+               <iconset>
                 <normaloff>:/icon/stop.png</normaloff>:/icon/stop.png</iconset>
               </property>
               <property name="iconSize">
@@ -1078,7 +1078,7 @@ QWidget#mainWidget:item:hover
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../images.qrc">
+               <iconset>
                 <normaloff>:/icon/slow.png</normaloff>:/icon/slow.png</iconset>
               </property>
               <property name="iconSize">
@@ -1101,7 +1101,7 @@ QWidget#mainWidget:item:hover
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../images.qrc">
+               <iconset>
                 <normaloff>:/icon/play.png</normaloff>:/icon/play.png</iconset>
               </property>
               <property name="iconSize">
@@ -1130,7 +1130,7 @@ QWidget#mainWidget:item:hover
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../images.qrc">
+               <iconset>
                 <normaloff>:/icon/speed.png</normaloff>:/icon/speed.png</iconset>
               </property>
               <property name="iconSize">
@@ -1153,7 +1153,7 @@ QWidget#mainWidget:item:hover
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../images.qrc">
+               <iconset>
                 <normaloff>:/icon/record.png</normaloff>:/icon/record.png</iconset>
               </property>
               <property name="iconSize">
@@ -1322,9 +1322,18 @@ QWidget#mainWidget:item:hover
      <addaction name="actionLowShelf"/>
      <addaction name="actionHighShelf"/>
     </widget>
+    <widget class="QMenu" name="menuChangeFactor">
+     <property name="title">
+      <string>ChangeFactor</string>
+     </property>
+     <addaction name="actionRate"/>
+     <addaction name="actionPitch"/>
+    </widget>
     <addaction name="separator"/>
-    <addaction name="actionChangeFactor"/>
+    <addaction name="menuChangeFactor"/>
     <addaction name="menuFilter"/>
+    <addaction name="actionPlayback"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1460,11 +1469,6 @@ QWidget#mainWidget:item:hover
     <string>About Music Mosnter</string>
    </property>
   </action>
-  <action name="actionChangeFactor">
-   <property name="text">
-    <string>ChangeFactor</string>
-   </property>
-  </action>
   <action name="actionHighPass">
    <property name="text">
     <string>HighPass</string>
@@ -1500,10 +1504,23 @@ QWidget#mainWidget:item:hover
     <string>HighShelf</string>
    </property>
   </action>
+  <action name="actionRate">
+   <property name="text">
+    <string>Rate</string>
+   </property>
+  </action>
+  <action name="actionPitch">
+   <property name="text">
+    <string>Pitch</string>
+   </property>
+  </action>
+  <action name="actionPlayback">
+   <property name="text">
+    <string>Playback</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="0" margin="11"/>
- <resources>
-  <include location="../images.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

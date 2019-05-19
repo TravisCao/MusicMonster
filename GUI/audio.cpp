@@ -38,6 +38,7 @@ Audio::Audio(int sampleRate, int channelCount, QString fileName, QWidget * paren
 
     timer = new QTimer(this);
 
+
     QAudioFormat format;
     format.setSampleRate(sampleRate);
     format.setChannelCount(channelCount);
@@ -74,20 +75,22 @@ int Audio::getChannelCount()
 void Audio::playAndPause(int index)
 {
     qDebug() << "playReceived";
-//     if the music index is the current index
-//     play or pause the music
     qDebug() << "list empty?" << playList->isEmpty();
     qDebug() << "list currentIndex : " << playList->currentIndex();
-//    player->play();
-//    timer->start(1);
+    timer->start(50);
+    connect(timer,&QTimer::timeout, this, &Audio::updateSender);
+
     if (index == playList->currentIndex()) {
         if (player->state() == QMediaPlayer::PlayingState) {
             player->pause();
             timer->stop();
+
+            emit musicPause(true);
         }
         else {
             player->play();
             timer->start(1);
+            emit musicStart(false);
         }
     }
     else {
@@ -95,12 +98,12 @@ void Audio::playAndPause(int index)
         if (player->state() == QMediaPlayer::PlayingState) {
             player->pause();
             timer->stop();
+            emit musicPause(true);
         }
         else { // if the music is not playing now
             player->setPosition(0); // play the music from the beginning
             player->play();
-            timer->start(1);
-//            connect();
+            emit musicStart(false);
         }
     }
 
@@ -196,7 +199,7 @@ void Audio::sliderChange(int position)
     int move = position * 1000;
     QTime timeNow(0, (move / 60000) & 60, (move / 1000) % 60);
 
-    emit positionChange(player->position());
+    emit positionChange(static_cast<int>(player->position()));
 }
 
 void Audio::updateTimeNow(qint64 position)
@@ -214,5 +217,10 @@ void Audio::removeMusic(int index)
 
 void Audio::updateDisplay()
 {
-    emit positionChange(player->position());
+    emit positionChange(static_cast<int>(player->position()));
+}
+
+void Audio::updateSender()
+{
+    emit update(static_cast<int>(player->position()));
 }

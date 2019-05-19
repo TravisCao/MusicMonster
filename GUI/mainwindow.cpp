@@ -5,6 +5,11 @@
 #include "readwav.h"
 #include "filterdialog.h"
 #include "saveasfiledialog.h"
+#include "changepitch.h"
+#include "changerate1.h"
+#include "playbackdialog.h"
+#include "mmtempo.h"
+#include "mmrate.h"
 
 #include <string>
 
@@ -38,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     audio = new Audio(this);
     fileWidget = new FileWidget(this);
     saveasFileDialog = new saveAsFileDialog(this);
+    changeRateDialog = new ChangeRate1(this);
+    changePitchDialog = new changepitch(this);
+    playbackdialog = new playbackDialog(this);
 
     filterDialog_1 = new FilterDialog(this);
     filterDialog_2 = new FilterDialog(this);
@@ -134,7 +142,94 @@ void MainWindow::removeItemSender()
             qDebug() << "removeItemAtRow: 0 ";
             emit removeItem(rows.at(i));
         }
+    }
+}
+
+void MainWindow::playback()
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+
+        MMbuffer<float> dbuffer;
+        dbuffer.setDataSize(2 * dbuffer.getDataSize());
+        dbuffer.initializeData();
+        dbuffer = *buffer;
+
+        if (playbackdialog->getPlaybackRate() == "1.0")
+            setTempo(99.0, *buffer, dbuffer); // 1.0 speed playback
+        if (playbackdialog->getPlaybackRate() == "2.0")
+            setTempo(98.0, *buffer, dbuffer); // 2.0 speed playback
+        if (playbackdialog->getPlaybackRate() == "0.5")
+            setTempo(97.0, *buffer, dbuffer); // 0.5 speed playback
+
+        qDebug() << "name: " << QString::fromStdString(fileName);
+        WavOutFile outFile(fileName.data(), dbuffer); //  save as file in a new name
+    }
+
+}
+
+void MainWindow::changeRate()
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+
+        MMbuffer<float> dbuffer;
+        dbuffer.setDataSize(2 * dbuffer.getDataSize());
+        dbuffer.initializeData();
+        if (changeRateDialog->getRate() == "0.25" || changeRateDialog->getRate() == "0.5" || \
+                changeRateDialog->getRate() == "0.33" || changeRateDialog->getRate() == "2.0"){
+
+            dbuffer = *buffer;
+            double newtempo = static_cast<double>(stod(changeRateDialog->getRate().toStdString()));
+            qDebug() << "newtempo :" << newtempo;
+            setTempo(newtempo, *buffer, dbuffer);
+            WavOutFile(fileName.data(), dbuffer);
         }
+        else {
+            double newRate = static_cast<double>(stod(changeRateDialog->getRate().toStdString()));
+            setRate(newRate, *buffer, dbuffer, 1);
+            WavOutFile(fileName.data(), dbuffer);
+        }
+     }
+
+}
+
+void MainWindow::changePitch()
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+
+        MMbuffer<float> dbuffer;
+        dbuffer.setDataSize(2 * dbuffer.getDataSize());
+        dbuffer.initializeData();
+        dbuffer = *buffer;
+        if (changePitchDialog->getPitch() == "Low") {
+            setTempo(89, *buffer, dbuffer);
+            WavOutFile(fileName.data(), dbuffer);
+        }
+        else {
+            setTempo(88, *buffer, dbuffer);
+            WavOutFile(fileName.data(), dbuffer);
+        }
+     }
 }
 
 void MainWindow::saveAsFile()
@@ -154,14 +249,6 @@ void MainWindow::saveAsFile()
         qDebug() << "name: " << QString::fromStdString(fileName);
         WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
     }
-//    else {
-//        for (int i = 0; i < rows.size(); ++i) {
-//            QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(i)).bufferList;
-//            int bufferIndex = fileWidget->fileList.at(rows.at(i)).bufferIndex;
-//            MMbuffer<float> *buffer = bufferList.at(bufferIndex);
-//            WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
-//        }
-//    }
 }
 
 void MainWindow::showSaveAsFile()
@@ -173,6 +260,18 @@ void MainWindow::showSaveAsFile()
 void MainWindow::musicPlay()
 {
     qDebug() << "musicPlay Receive";
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+        uiMainWindow->volumeBar->setMaximum(static_cast<int>(buffer->findPeak()));
+        uiMainWindow->volumeBar->setMinimum(static_cast<int>(buffer->findMinPeak()));
+    }
+
     QList<int> musics;
     if (!fileWidget->selectionModel->hasSelection()) return;
     musics = fileWidget->getSelectedRows();
@@ -239,7 +338,6 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
 
 
-
     connect(uiMainWindow->actionSave_As, &QAction::triggered, this, &MainWindow::showSaveAsFile);
 
     connect(saveasFileDialog, &saveAsFileDialog::accepted, this, &MainWindow::saveAsFile);
@@ -273,6 +371,7 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->slow, &QPushButton::released, audio, &Audio::musicRecoverSpeed);
 
     connect(audio, &Audio::positionChange, this, &MainWindow::changeSlider);
+    connect(audio, &Audio::update, this, &MainWindow::changeVolumeBar);
     connect(uiMainWindow->slider, &QSlider::sliderMoved, audio, &Audio::sliderChange);
 
     connect(uiMainWindow->actionHighPass, &QAction::triggered, filterDialog_1, &FilterDialog::showHighLowPass);
@@ -282,6 +381,19 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionPeaking, &QAction::triggered, filterDialog_5, &FilterDialog::showHighLowShelf);
     connect(uiMainWindow->actionHighShelf, &QAction::triggered, filterDialog_6, &FilterDialog::showHighLowShelf);
     connect(uiMainWindow->actionLowShelf, &QAction::triggered, filterDialog_7, &FilterDialog::showHighLowShelf);
+
+    connect(uiMainWindow->actionRate, &QAction::triggered, changeRateDialog, &ChangeRate1::show);
+    connect(changeRateDialog,&ChangeRate1::accepted, this, &MainWindow::changeRate);
+
+    connect(uiMainWindow->actionPitch, &QAction::triggered, changePitchDialog, &changepitch::show);
+    connect(changePitchDialog, &changepitch::accepted, this, &MainWindow::changePitch);
+
+    connect(uiMainWindow->actionPlayback, &QAction::triggered, playbackdialog, &playbackDialog::show);
+    connect(playbackdialog, &playbackDialog::accepted, this, &MainWindow::playback);
+
+    connect(audio, &Audio::musicStart, this, &MainWindow::togglePlayButton);
+    connect(audio, &Audio::musicPause, this, &MainWindow::togglePlayButton);
+
 
 }
 
@@ -365,6 +477,26 @@ void MainWindow::changeSlider(qint64 position)
     QString timetotalString = timetotal.toString("mm:ss");
     uiMainWindow->timeNow->display(timenowString);
     uiMainWindow->timeTotal->display(timetotalString);
+}
+
+void MainWindow::changeVolumeBar(int value)
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+        qDebug() << "min Vol:" << uiMainWindow->volumeBar->minimum();
+        qDebug() << "max Vol:" << uiMainWindow->volumeBar->maximum();
+        uiMainWindow->volumeBar->setValue(static_cast<int>(buffer->getCurrent(value)));
+        qDebug() << "current Vol:" << static_cast<int>(buffer->getCurrent(value));
+//        for (int i = 0; i < buffer->getDataNum(); ++i) {
+//            qDebug() << "pData: " << buffer->pData[i];
+//        }
+    }
 }
 
 

@@ -33,9 +33,13 @@ public:
 
 signals:
 
-    void musicStart();
+    void musicStart(bool flag);
 
-    void positionChange(qint64 position);
+    void musicPause(bool flag);
+
+    void positionChange(int position);
+
+    void update(int position);
 
 
 public slots:
@@ -69,6 +73,8 @@ public slots:
     void removeMusic(int index);
 
     void updateDisplay();
+
+    void updateSender();
 
 protected:
 

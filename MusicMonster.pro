@@ -41,7 +41,10 @@ SOURCES += \
     GUI/filterdialog.cpp \
     changerate1.cpp \
     GUI/changepitch.cpp \
-    GUI/playbackdialog.cpp
+    GUI/playbackdialog.cpp \
+    Waveform/wavWidget.cpp \
+    Waveform/wavDraw.cpp \
+    Waveform/fft.cpp
 
 
 HEADERS += \
@@ -59,7 +62,11 @@ HEADERS += \
     DataProcessing/mmrate.h \
     changerate1.h \
     GUI/changepitch.h \
-    GUI/playbackdialog.h
+    GUI/playbackdialog.h \
+    DataProcessing/mmtempo.h \
+    Waveform/wavWidget.h \
+    Waveform/wavDraw.h \
+    Waveform/fft.h
 
 FORMS += \
     GUI/newdialogForm.ui \
@@ -81,9 +88,12 @@ INCLUDEPATH += /Users/travis/Documents/MusicMonster/DataProcessing
 INCLUDEPATH += /Users/travis/Documents/MusicMonster/GUI
 INCLUDEPATH += /Users/travis/Documents/MusicMonster/Filter
 INCLUDEPATH += /Users/travis/Documents/MusicMonster/VersionForTest
+INCLUDEPATH += /Users/travis/Documents/MusicMonster/Waveform
+
 
 RESOURCES += \
-    images.qrc
+    images.qrc \
+    Waveform/wavDraw.qrc
 
 SUBDIRS += \
     MusicMonster.pro
