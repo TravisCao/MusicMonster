@@ -412,8 +412,6 @@ public:
 
 
 //public:
-    /// Constructor: Creates a new WAV file. Throws a 'runtime_error' exception
-    /// if file creation fails.
     WavOutFile(const char *fileName, MMbuffer<float> &buffer);
 
 
@@ -421,7 +419,6 @@ public:
     ~WavOutFile();
 
     /// Write data to WAV file in floating point format, saturating sample values to range
-    /// [-1..+1[. Throws a 'runtime_error' exception if writing to file fails.
     void write(MMbuffer<float> &buffer);
 };
 

@@ -30,7 +30,6 @@ WavInFile::~WavInFile() {
     fptr = NULL;
 }
 
-//如果文件格式不对，就终止程序
 
 void WavInFile::init() {
     int checkF;
@@ -275,13 +274,10 @@ int WavInFile::read()
 
     buffer.initializeData();
     bytesPerSample = buffer.format.BitsPerSample / 8;
+
     if ((bytesPerSample < 1) || (bytesPerSample > 4))
     {
-        stringstream ss;
-        ss << "\nOnly 8/16/24/32 bit sample WAV files supported. Can't open WAV file with ";
-        ss << static_cast<int>(buffer.format.BitsPerSample);
-        ss << " bit sample format. ";
-        //error(ss.str().c_str());
+       checkFlag = 1;
     }
 
     numBytes = maxElems * bytesPerSample;
@@ -290,7 +286,6 @@ int WavInFile::read()
     {
         // Don't read more samples than are marked available in header
         numBytes = (int)buffer.data.lenData - (int)dataRead;
-        //assert(numBytes >= 0);
     }
 
     // read raw data into temporary buffer
@@ -400,13 +395,6 @@ void WavOutFile::writeBaseHeader(const MMbuffer<float> &buffer)
     fwrite(&(buffer.data),sizeof (buffer.data),1,fptr);
 }
 
-//void WavOutFile::finishHeader()
-//{
-//    // supplement the length of whole file, data length and fact sample length in the header.
-//    riff.lenAll = static_cast<uint32_t>(bytesWritten) + sizeof(WavFormat) + sizeof(WavFact) + sizeof(WavData) + 4;
-//    data.lenData = static_cast<uint32_t>(bytesWritten);
-//    fact.factSamplelen = static_cast<uint32_t>(bytesWritten) / format.BlockAlign;
-//}
 
 int WavOutFile::saturate(float fvalue, float minval, float maxval)
 {

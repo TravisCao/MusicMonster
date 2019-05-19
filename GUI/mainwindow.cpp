@@ -14,6 +14,7 @@
 #include "cutdialog.h"
 
 #include <string>
+#include <stdlib.h>
 
 #include <QProcess>
 #include <QStandardItemModel>
@@ -158,6 +159,7 @@ void MainWindow::playback()
     rows = fileWidget->getSelectedRows();
     if (rows.size() == 1) {
         std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        fileName = fileName.substr(0, fileName.size() - 4) + "_tempBack.wav";
         QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
         int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
         MMbuffer<float> *buffer = bufferList.at(bufferIndex);
@@ -176,6 +178,7 @@ void MainWindow::playback()
 
         qDebug() << "name: " << QString::fromStdString(fileName);
         WavOutFile outFile(fileName.data(), dbuffer); //  save as file in a new name
+        addTempFile(QString::fromStdString(fileName));
     }
 
 }
@@ -187,6 +190,7 @@ void MainWindow::changeRate()
     rows = fileWidget->getSelectedRows();
     if (rows.size() == 1) {
         std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        fileName = fileName.substr(0,fileName.size()-4) + "_RateTemp.wav";
         QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
         int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
         MMbuffer<float> *buffer = bufferList.at(bufferIndex);
@@ -201,11 +205,13 @@ void MainWindow::changeRate()
             qDebug() << "newtempo :" << newtempo;
             setTempo(newtempo, *buffer, dbuffer);
             WavOutFile(fileName.data(), dbuffer);
+//            addTempFile(QString::fromStdString(fileName));
         }
         else {
             double newRate = static_cast<double>(stod(changeRateDialog->getRate().toStdString()));
             setRate(newRate, *buffer, dbuffer, 1);
             WavOutFile(fileName.data(), dbuffer);
+//            addTempFile(QString::fromStdString(fileName));
         }
         fileWidget->fileList[rows.at(0)].bufferList.append(&dbuffer);
         fileWidget->fileList[rows.at(0)].bufferIndex += 1;
@@ -220,6 +226,7 @@ void MainWindow::changePitch()
     rows = fileWidget->getSelectedRows();
     if (rows.size() == 1) {
         std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        fileName = fileName.substr(0, fileName.size() - 4) + "_tempPitch.wav";
         QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
         int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
         MMbuffer<float> *buffer = bufferList.at(bufferIndex);
@@ -231,10 +238,12 @@ void MainWindow::changePitch()
         if (changePitchDialog->getPitch() == "Low") {
             setTempo(89, *buffer, dbuffer);
             WavOutFile(fileName.data(), dbuffer);
+//            addTempFile(QString::fromStdString(fileName));
         }
         else {
             setTempo(88, *buffer, dbuffer);
             WavOutFile(fileName.data(), dbuffer);
+//            addTempFile(QString::fromStdString(fileName));
         }
         fileWidget->fileList[rows.at(0)].bufferList.append(&dbuffer);
         fileWidget->fileList[rows.at(0)].bufferIndex += 1;
@@ -263,7 +272,6 @@ void MainWindow::saveAsFile()
 void MainWindow::showSaveAsFile()
 {
    saveasFileDialog->show();
-
 }
 
 void MainWindow::musicPlay()
@@ -519,6 +527,15 @@ void MainWindow::changeVolumeBar(int value)
     }
 }
 
+void MainWindow::addTempFile(QString filename)
+{
+   QFile file(filename);
+   file.open(QFile::ReadOnly);
+   fileWidget->addItem(filename);
+   audio->addToPlayList(filename);
+//   uiMainWindow->waveWidget->setFile(filename);
+}
+
 void MainWindow::highPass()
 {
     QStringList args;
@@ -580,41 +597,41 @@ void MainWindow::highPass()
 
 void MainWindow::lowPass()
 {
-    QStringList args;
+    string argsWin;
+    string argsMac;
+    argsWin += "/Users/travis/Documents/MusicMonster/Filter/a.exe" + string(" ");
+    argsMac += "/Users/travis/Documents/MusicMonster/Filter/a.out" + string(" ");
     QList<int> rows;
     if (!fileWidget->selectionModel->hasSelection()) return;
     rows = fileWidget->getSelectedRows();
     if (rows.size() == 1) {
         QString fileName = openedFileNames.at(rows.at(0));
+        argsWin += fileName.toStdString() + " ";
+        argsMac += fileName.toStdString() + " ";
         fileName.chop(4);
         QString outputFileName = fileName + "_LowPass.wav";
+        argsWin += outputFileName.toStdString() + " ";
+        argsMac += outputFileName.toStdString() + " ";
+
+        argsWin += "lowpass" + string(" ");
+        argsMac += "lowpass" + string(" ");
+
+        argsWin += (filterDialog_2->getHighLowPassCutoff()).toStdString() + " ";
+        argsMac += (filterDialog_2->getHighLowPassCutoff()).toStdString() + " ";
+
+        argsMac += (filterDialog_2->getHighLowPassResonance()).toStdString() ;
+        argsWin += (filterDialog_2->getHighLowPassResonance()).toStdString() ;
+
+
+
 
 #ifdef Q_OS_WIN
-        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
-        args.append(fileName);
-        args.append(outputFileName);
-        args.append("lowpass");
-        args.append(filterDialog_2->getHighLowPassCutoff());
-        args.append(filterDialog_2->getHighLowPassResonance());
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
-
+        system(argsWin);
 #endif
 
 #ifdef Q_OS_MAC
+//        system(argsMac);
 
-    QProcess proc;
-
-    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
-    args.append(fileName);
-    args.append(outputFileName);
-    args.append("lowpass");
-    args.append(filterDialog_2->getHighLowPassCutoff());
-    args.append(filterDialog_2->getHighLowPassResonance());
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
 
 #endif
     }
@@ -885,6 +902,7 @@ void MainWindow::cutTime()
     rows = fileWidget->getSelectedRows();
     if (rows.size() == 1) {
         std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        fileName = fileName.substr(fileName.size() - 4) + "_tempCut.wav";
         QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
         int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
         MMbuffer<float> *buffer = bufferList.at(bufferIndex);

@@ -80,6 +80,8 @@ public slots:
 
     void changeVolumeBar(int value);
 
+    void addTempFile(QString filename);
+
     // for filter
 
     void highPass();
