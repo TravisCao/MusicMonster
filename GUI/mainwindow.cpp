@@ -10,9 +10,11 @@
 #include "playbackdialog.h"
 #include "mmtempo.h"
 #include "mmrate.h"
+#include "wavWidget.h"
 
 #include <string>
 
+#include <QProcess>
 #include <QStandardItemModel>
 #include <QAbstractItemView>
 #include <QStandardItem>
@@ -96,6 +98,8 @@ QList<QString> *MainWindow::openFile()
         openedFileNames << fileName;
         fileWidget->addItem(fileName);
         audio->addToPlayList(fileName);
+//        uiMainWindow->waveWidget->setFile(fileName);
+//        uiMainWindow->waveWidget->update();
     }
 
     buttonRecover();
@@ -382,6 +386,14 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionHighShelf, &QAction::triggered, filterDialog_6, &FilterDialog::showHighLowShelf);
     connect(uiMainWindow->actionLowShelf, &QAction::triggered, filterDialog_7, &FilterDialog::showHighLowShelf);
 
+    connect(filterDialog_1,&FilterDialog::accepted, this, &MainWindow::highPass);
+    connect(filterDialog_2,&FilterDialog::accepted, this, &MainWindow::lowPass);
+    connect(filterDialog_3,&FilterDialog::accepted, this, &MainWindow::notch);
+    connect(filterDialog_4,&FilterDialog::accepted, this, &MainWindow::bandPass);
+    connect(filterDialog_5,&FilterDialog::accepted, this, &MainWindow::peaking);
+    connect(filterDialog_6,&FilterDialog::accepted, this, &MainWindow::highShelf);
+    connect(filterDialog_7,&FilterDialog::accepted, this, &MainWindow::lowShelf);
+
     connect(uiMainWindow->actionRate, &QAction::triggered, changeRateDialog, &ChangeRate1::show);
     connect(changeRateDialog,&ChangeRate1::accepted, this, &MainWindow::changeRate);
 
@@ -489,14 +501,318 @@ void MainWindow::changeVolumeBar(int value)
         QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
         int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
         MMbuffer<float> *buffer = bufferList.at(bufferIndex);
-        qDebug() << "min Vol:" << uiMainWindow->volumeBar->minimum();
-        qDebug() << "max Vol:" << uiMainWindow->volumeBar->maximum();
         uiMainWindow->volumeBar->setValue(static_cast<int>(buffer->getCurrent(value)));
-        qDebug() << "current Vol:" << static_cast<int>(buffer->getCurrent(value));
-//        for (int i = 0; i < buffer->getDataNum(); ++i) {
-//            qDebug() << "pData: " << buffer->pData[i];
-//        }
     }
+}
+
+void MainWindow::highPass()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_HighPass.wav";
+
+
+#ifdef Q_OS_WIN
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("highpass");
+        args.append(filterDialog_1->getHighLowPassCutoff());
+        args.append(filterDialog_1->getHighLowPassResonance());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+
+    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    args.append(fileName);
+    args.append(outputFileName);
+    args.append("highpass");
+    args.append(filterDialog_1->getHighLowPassCutoff());
+    args.append(filterDialog_1->getHighLowPassResonance());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
+}
+
+void MainWindow::lowPass()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_LowPass.wav";
+
+#ifdef Q_OS_WIN
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("lowpass");
+        args.append(filterDialog_2->getHighLowPassCutoff());
+        args.append(filterDialog_2->getHighLowPassResonance());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+
+    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    args.append(fileName);
+    args.append(outputFileName);
+    args.append("lowpass");
+    args.append(filterDialog_2->getHighLowPassCutoff());
+    args.append(filterDialog_2->getHighLowPassResonance());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
+}
+
+void MainWindow::bandPass()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_bandPass.wav";
+
+#ifdef Q_OS_WIN
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("bandpass");
+        args.append(filterDialog_4->getBandNotchFreq());
+        args.append(filterDialog_4->getBandNotchSpan());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    args.append(fileName);
+    args.append(outputFileName);
+    args.append("bandpass");
+    args.append(filterDialog_4->getBandNotchFreq());
+    args.append(filterDialog_4->getBandNotchSpan());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
+}
+
+void MainWindow::peaking()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_peaking.wav";
+
+#ifdef Q_OS_WIN
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("peaking");
+        args.append(filterDialog_5->getHighLowShelfFreq());
+        args.append(filterDialog_5->getHighLowShelfSpan());
+        args.append(filterDialog_5->getHighLowShelfGain());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+
+    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    args.append(fileName);
+    args.append(outputFileName);
+    args.append("peaking");
+    args.append(filterDialog_5->getHighLowShelfFreq());
+    args.append(filterDialog_5->getHighLowShelfSpan());
+    args.append(filterDialog_5->getHighLowShelfGain());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
+}
+
+void MainWindow::notch()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_notch.wav";
+
+#ifdef Q_OS_WIN
+
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("notch");
+        args.append(filterDialog_3->getBandNotchFreq());
+        args.append(filterDialog_3->getBandNotchSpan());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    args.append(fileName);
+    args.append(outputFileName);
+    args.append("notch");
+    args.append(filterDialog_3->getBandNotchFreq());
+    args.append(filterDialog_3->getBandNotchSpan());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
+}
+
+void MainWindow::lowShelf()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_lowShelf.wav";
+
+
+#ifdef Q_OS_WIN
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("lowshelf");
+        args.append(filterDialog_7->getHighLowShelfFreq());
+        args.append(filterDialog_7->getHighLowShelfSpan());
+        args.append(filterDialog_7->getHighLowShelfGain());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("lowshelf");
+        args.append(filterDialog_7->getHighLowShelfFreq());
+        args.append(filterDialog_7->getHighLowShelfSpan());
+        args.append(filterDialog_7->getHighLowShelfGain());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
+}
+
+void MainWindow::highShelf()
+{
+    QStringList args;
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        QString fileName = openedFileNames.at(rows.at(0));
+        fileName.chop(4);
+        QString outputFileName = fileName + "_highShelf.wav";
+
+#ifdef Q_OS_WIN
+        args.append("/Users/travis/Documents/MusicMonster/Filter/a.exe");
+        args.append(fileName);
+        args.append(outputFileName);
+        args.append("highshelf");
+        args.append(filterDialog_6->getHighLowShelfFreq());
+        args.append(filterDialog_6->getHighLowShelfSpan());
+        args.append(filterDialog_6->getHighLowShelfGain());
+
+    QProcess::startDetached("/Users/travis/Documents/MusicMonster/Filter/a.exe", args);
+
+#endif
+
+#ifdef Q_OS_MAC
+
+    QProcess proc;
+    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    args.append(fileName);
+    args.append(outputFileName);
+    args.append("highshelf");
+    args.append(filterDialog_6->getHighLowShelfFreq());
+    args.append(filterDialog_6->getHighLowShelfSpan());
+    args.append(filterDialog_6->getHighLowShelfGain());
+
+    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
+
+    proc.waitForFinished(-1);  //
+
+#endif
+    }
+
 }
 
 

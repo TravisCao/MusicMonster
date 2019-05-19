@@ -26,28 +26,25 @@ public slots:
 
     void showHighLowPass();
 
-    void highPass();
+    QString getBandNotchFreq();
 
-    void lowPass();
+    QString getBandNotchSpan();
 
-    void bandPass();
+    QString getHighLowShelfFreq();
 
-    void peaking();
+    QString getHighLowShelfSpan();
 
-    void notch();
+    QString getHighLowShelfGain();
 
-    void lowShelf();
+    QString getHighLowPassCutoff();
 
-    void highShelf();
-
-
-
+    QString getHighLowPassResonance();
 
 
 private:
-    Ui::HighLowShelfDialog *ui_HighLowShelf;
-    Ui::BandNotchDialog *ui_BandNotch;
-    Ui::HighLowPassDialog *ui_highlowPass;
+    Ui::HighLowShelfDialog *ui_HighLowShelf; // 3
+    Ui::BandNotchDialog *ui_BandNotch; // 2
+    Ui::HighLowPassDialog *ui_highlowPass; //2
 };
 
 #endif // FILTERDIALOG_H

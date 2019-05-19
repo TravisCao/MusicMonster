@@ -110,7 +110,7 @@ void WavWidget::setFile(QString filepath)
 	m_sampleRate = file.getSampleRate();
 	m_freq = fourier_analyze(m_data, m_sampleRate, 1);
 	
-	update();
+//    update();
 }
 
 vector<float> WavWidget::fourier_analyze(const vector<float> &time_samples, float sample_rate, uint64_t zero_pad_multiplier)

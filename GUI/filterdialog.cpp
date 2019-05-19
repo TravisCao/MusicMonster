@@ -32,153 +32,38 @@ void FilterDialog::showHighLowPass()
     show();
 }
 
-void FilterDialog::highPass()
+QString FilterDialog::getHighLowShelfFreq()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
-
-
+    return ui_HighLowShelf->freq->text();
 }
 
-void FilterDialog::lowPass()
+QString FilterDialog::getHighLowShelfSpan()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
+    return ui_HighLowShelf->span->text();
 }
 
-void FilterDialog::bandPass()
+QString FilterDialog::getBandNotchFreq()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
+    return ui_BandNotch->freq->text();
 }
 
-void FilterDialog::peaking()
+QString FilterDialog::getBandNotchSpan()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
+    return ui_BandNotch->span->text();
 }
 
-void FilterDialog::notch()
+QString FilterDialog::getHighLowShelfGain()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
+    return ui_HighLowShelf->gain->text();
 }
 
-void FilterDialog::lowShelf()
+QString FilterDialog::getHighLowPassCutoff()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
+    return ui_highlowPass->cutoff->text();
 }
 
-void FilterDialog::highShelf()
+QString FilterDialog::getHighLowPassResonance()
 {
-    QStringList args;  //如果需要启动参数的话
-
-#ifdef Q_OS_WIN
-
-    QProcess::startDetached("/Users/travis/Documents/MusicMonster/a.exe", args);
-
-#endif
-
-#ifdef Q_OS_MAC
-
-    QProcess proc;
-
-    proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
-
-    proc.waitForFinished(-1);  //
-
-#endif
+    return ui_highlowPass->resonance->text();
 }
-
 

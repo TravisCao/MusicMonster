@@ -42,6 +42,7 @@ signals:
     void changePosition(int position);
     void stopMusic();
 
+
 public slots:
 
     void newFile();
@@ -77,6 +78,22 @@ public slots:
     void changeSlider(qint64 position);
 
     void changeVolumeBar(int value);
+
+    // for filter
+
+    void highPass();
+
+    void lowPass();
+
+    void bandPass();
+
+    void peaking();
+
+    void notch();
+
+    void lowShelf();
+
+    void highShelf();
 
 private:
 
