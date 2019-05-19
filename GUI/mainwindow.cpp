@@ -2,7 +2,6 @@
 #include "newfiledialog.h"
 #include "ui_mainwindowForm.h"
 #include "audio.h"
-#include "changefactor.h"
 #include "readwav.h"
 #include "filterdialog.h"
 #include "saveasfiledialog.h"
@@ -68,12 +67,6 @@ void MainWindow::newFile()
     newFileDialog = new NewFileDialog(this);
     newFileDialog->show();
     qDebug() << "new";
-}
-
-void MainWindow::changeFactor()
-{
-    ChangeFactor *change = new ChangeFactor(this);
-    change->show();
 }
 
 QList<QString> *MainWindow::openFile()
@@ -161,14 +154,14 @@ void MainWindow::saveAsFile()
         qDebug() << "name: " << QString::fromStdString(fileName);
         WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
     }
-    else {
-        for (int i = 0; i < rows.size(); ++i) {
-            QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(i)).bufferList;
-            int bufferIndex = fileWidget->fileList.at(rows.at(i)).bufferIndex;
-            MMbuffer<float> *buffer = bufferList.at(bufferIndex);
-            WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
-        }
-    }
+//    else {
+//        for (int i = 0; i < rows.size(); ++i) {
+//            QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(i)).bufferList;
+//            int bufferIndex = fileWidget->fileList.at(rows.at(i)).bufferIndex;
+//            MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+//            WavOutFile outFile(fileName.data(), *buffer); //  save as file in a new name
+//        }
+//    }
 }
 
 void MainWindow::showSaveAsFile()
@@ -244,7 +237,6 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionOpen, &QAction::triggered, this, &MainWindow::openFile);
     connect(uiMainWindow->actionAbout_Music_Mosnter, &QAction::triggered, this, &MainWindow::about);
     connect(uiMainWindow->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
-    connect(uiMainWindow->actionChangeFactor, &QAction::triggered, this, &MainWindow::changeFactor);
 
 
 

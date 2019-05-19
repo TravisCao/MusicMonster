@@ -31,6 +31,7 @@ void WavInFile::init() {
     if ((checkF != 0) || (checkP != 0)) {
         checkFlag = 1;
     }
+   read();
 }
 
 //check the format of the wav file by checking the RIFF, fmt and data sign and checking the other signs.

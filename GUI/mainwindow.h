@@ -3,7 +3,6 @@
 
 #include "filewidget.h"
 #include "newfiledialog.h"
-#include "changefactor.h"
 #include "audio.h"
 #include "saveasfiledialog.h"
 #include "filterdialog.h"
@@ -45,8 +44,6 @@ public slots:
     void newFile();
 
     QList<QString> *openFile();
-
-    void changeFactor();
 
     void about();
 

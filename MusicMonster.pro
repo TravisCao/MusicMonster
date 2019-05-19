@@ -29,7 +29,6 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
     GUI/audio.cpp \
-    GUI/changefactor.cpp \
     GUI/filewidget.cpp \
     GUI/mainwindow.cpp \
     GUI/newfiledialog.cpp \
@@ -39,12 +38,14 @@ SOURCES += \
     Filter/filter.cpp \
     Filter/WavIO.cpp \
     Filter/cell.cpp \
-    GUI/filterdialog.cpp
+    GUI/filterdialog.cpp \
+    changerate1.cpp \
+    GUI/changepitch.cpp \
+    GUI/playbackdialog.cpp
 
 
 HEADERS += \
     GUI/audio.h \
-    GUI/changefactor.h \
     GUI/filewidget.h \
     GUI/mainwindow.h \
     GUI/newfiledialog.h \
@@ -55,16 +56,21 @@ HEADERS += \
     Filter/cell.h \
     Filter/decon.h \
     GUI/filterdialog.h \
-    DataProcessing/mmrate.h
+    DataProcessing/mmrate.h \
+    changerate1.h \
+    GUI/changepitch.h \
+    GUI/playbackdialog.h
 
 FORMS += \
     GUI/newdialogForm.ui \
     GUI/mainwindowForm.ui \
-    GUI/changefactordialog.ui \
     GUI/savefiledialog.ui \
     GUI/filterhighlowpassdialog.ui \
     GUI/bandnotchdialog.ui \
-    GUI/highlowshelfdialog.ui
+    GUI/highlowshelfdialog.ui \
+    changerate1.ui \
+    GUI/changepitch.ui \
+    GUI/playbackdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
