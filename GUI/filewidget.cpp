@@ -46,6 +46,8 @@ void FileWidget::addItem(QString fileName)
     std::string filenameString = fileName.toStdString();
     WavInFile *wavfile = new WavInFile(filenameString.data());
 
+    wavfile->read();
+
     MMbuffer<float> *buffer = &(wavfile->buffer);
 
     QFileInfo info = QFileInfo(fileName);

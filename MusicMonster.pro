@@ -85,11 +85,11 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-INCLUDEPATH += /Users/travis/Documents/MusicMonster/DataProcessing
-INCLUDEPATH += /Users/travis/Documents/MusicMonster/GUI
-INCLUDEPATH += /Users/travis/Documents/MusicMonster/Filter
-INCLUDEPATH += /Users/travis/Documents/MusicMonster/VersionForTest
-INCLUDEPATH += /Users/travis/Documents/MusicMonster/Waveform
+INCLUDEPATH += $$PWD/DataProcessing
+INCLUDEPATH += $$PWD/GUI
+INCLUDEPATH += $$PWD/Filter
+INCLUDEPATH += $$PWD/VersionForTest
+INCLUDEPATH += $$PWD/Waveform
 
 
 RESOURCES += \

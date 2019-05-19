@@ -6,11 +6,7 @@
 #include <stdio.h>
 using namespace std;
 
-static const char riffStr[] = "RIFF";
-static const char waveStr[] = "WAVE";
-static const char fmtStr[]  = "fmt ";
-static const char factStr[] = "fact";
-static const char dataStr[] = "data";
+typedef unsigned int uint;
 
 /// data structure of the file.
 struct WavRiff {
@@ -120,18 +116,16 @@ public:
 
     void calBlockAlign();
 
-    void writeTags();
-
-    ValueType findPeak();
-
-    ValueType getCurrent(int timeInMs);
-
-    ValueType findMinPeak();
 
     WavRiff riff;
     WavFormat format;
     WavFact fact;
     WavData data;
+
+    ValueType findPeak();
+    ValueType getCurrent(int timeInMS);
+
+    ValueType findMinPeak();
     // The data type is determined by the BitsPerSample of the wav file
     ValueType * pData;
 // Other parameters in need
@@ -269,7 +263,7 @@ int MMbuffer<ValueType>::getDataNum() {
 template <typename ValueType>
 int MMbuffer<ValueType>::getSampleNum(){
     sampleNum = getDataNum();
-    if (format.ChannelNum == 2) sampleNum = sampleNum/2;
+    if (format.ChannelNum == 1) sampleNum = sampleNum/2;
     return sampleNum;
 }
 
@@ -292,14 +286,6 @@ void MMbuffer<ValueType>::calByteRate(){
 template <typename ValueType>
 void MMbuffer<ValueType>::calBlockAlign(){
     format.BlockAlign = format.ChannelNum * format.BitsPerSample / 8;
-}
-
-template <typename ValueType>
-void MMbuffer<ValueType>::writeTags(){
-    riff.Riff = riffStr;
-    riff.Wave = waveStr;
-    format.fmtSign = fmtStr;
-    data.dataSign = dataStr;
 }
 
 template <typename ValueType>
@@ -328,7 +314,6 @@ ValueType MMbuffer<ValueType>::findMinPeak() {
     }
     return min*10000;
 }
-
 
 class WavInFile
 {
@@ -403,7 +388,7 @@ class WavOutFile
 public:
 //private:
     /// Pointer to the WAV file
-    FILE *fptr;      
+    FILE *fptr;
     /// WAV file header data.
     WavRiff riff;
     WavFormat format;
@@ -419,7 +404,7 @@ public:
 
 
     /// Fills in WAV file header information.
-    void writeBaseHeader(MMbuffer<float> &buffer);
+    void writeBaseHeader(const MMbuffer<float> &buffer);
 
     /// Finishes the WAV file header after we get the length of data.
 //    void finishHeader();

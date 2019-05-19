@@ -100,7 +100,7 @@ QList<QString> *MainWindow::openFile()
         openedFileNames << fileName;
         fileWidget->addItem(fileName);
         audio->addToPlayList(fileName);
-//        uiMainWindow->waveWidget->setFile(fileName);
+        uiMainWindow->waveWidget->setFile(fileName);
 //        uiMainWindow->waveWidget->update();
     }
 
@@ -190,7 +190,6 @@ void MainWindow::changeRate()
         QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
         int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
         MMbuffer<float> *buffer = bufferList.at(bufferIndex);
-
         MMbuffer<float> dbuffer;
         dbuffer.setDataSize(2 * dbuffer.getDataSize());
         dbuffer.initializeData();
@@ -208,6 +207,8 @@ void MainWindow::changeRate()
             setRate(newRate, *buffer, dbuffer, 1);
             WavOutFile(fileName.data(), dbuffer);
         }
+        fileWidget->fileList[rows.at(0)].bufferList.append(&dbuffer);
+        fileWidget->fileList[rows.at(0)].bufferIndex += 1;
      }
 
 }
@@ -235,6 +236,8 @@ void MainWindow::changePitch()
             setTempo(88, *buffer, dbuffer);
             WavOutFile(fileName.data(), dbuffer);
         }
+        fileWidget->fileList[rows.at(0)].bufferList.append(&dbuffer);
+        fileWidget->fileList[rows.at(0)].bufferIndex += 1;
      }
 }
 
@@ -890,7 +893,8 @@ void MainWindow::cutTime()
 
         MMcut(cutdialog->get_timeBegin(),cutdialog->get_timeEnd(), audio->getAudioDuration(), *buffer, *dbuffer);
 
-//        (fileWidget->fileList.at(rows.at(0)).bufferList).
+        fileWidget->fileList[rows.at(0)].bufferList.append(dbuffer);
+        fileWidget->fileList[rows.at(0)].bufferIndex += 1;
 
         WavOutFile outfile(fileName.data(), *dbuffer);
 

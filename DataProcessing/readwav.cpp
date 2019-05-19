@@ -3,13 +3,22 @@
 #include <sstream>
 #include <stdio.h>
 #include "readwav.h"
+#include "assert.h"
 using namespace std;
 
+static const char riffStr[] = "RIFF";
+static const char waveStr[] = "WAVE";
+static const char fmtStr[]  = "fmt ";
+static const char factStr[] = "fact";
+static const char dataStr[] = "data";
 
 WavInFile::WavInFile(const char *fileName) {
 
+ dataRead = 0;
+ position = 0;
+
     fptr = fopen(fileName, "rb");
-    if (fptr == nullptr)
+    if (fptr == NULL)
     {
         checkFlag = 1;
     }
@@ -18,7 +27,7 @@ WavInFile::WavInFile(const char *fileName) {
 
 WavInFile::~WavInFile() {
     if (fptr) fclose(fptr);
-    fptr = nullptr;
+    fptr = NULL;
 }
 
 //如果文件格式不对，就终止程序
@@ -31,7 +40,6 @@ void WavInFile::init() {
     if ((checkF != 0) || (checkP != 0)) {
         checkFlag = 1;
     }
-   read();
 }
 
 //check the format of the wav file by checking the RIFF, fmt and data sign and checking the other signs.
@@ -82,7 +90,7 @@ int WavInFile::readHeader() {
         nDiffer = nLen - (static_cast<int>(sizeof(buffer.format)) - 8);
         if ((nLen < 0) || (nDiffer < 0)) return -1;
 
-        buffer.format.lenFormat = static_cast<uint32_t>(nLen);
+        buffer.format.lenFormat = nLen;
 
         // read data
         if (fread(&(buffer.format.type), sizeof(uint16_t), 1, fptr) != 1) return -1;
@@ -117,7 +125,7 @@ int WavInFile::readHeader() {
         nDiffer = nLen - (static_cast<int>(sizeof(buffer.fact)) - 8);
         if ((nLen < 0) || (nDiffer < 0)) return -1;
 
-        buffer.fact.lenFact = static_cast<uint32_t>(nLen);
+        buffer.fact.lenFact = nLen;
 
         // read data
         if (fread(&(buffer.fact.factSamplelen), sizeof(uint32_t), 1, fptr) != 1) return -1;
@@ -277,18 +285,18 @@ int WavInFile::read()
     }
 
     numBytes = maxElems * bytesPerSample;
-    afterDataRead = static_cast<uint>(dataRead + numBytes);
+    afterDataRead = dataRead + numBytes;
     if (afterDataRead > buffer.data.lenData)
     {
         // Don't read more samples than are marked available in header
-        numBytes = static_cast<int>(buffer.data.lenData) - static_cast<int>(dataRead);
+        numBytes = (int)buffer.data.lenData - (int)dataRead;
         //assert(numBytes >= 0);
     }
 
     // read raw data into temporary buffer
     int convBuffSize = (numBytes + 15) & -8;
     char *temp = new char[convBuffSize];
-    numBytes = static_cast<int>(fread(temp, 1, static_cast<size_t>(numBytes), fptr));
+    numBytes = static_cast<int>(fread(temp, 1, numBytes, fptr));
     dataRead += numBytes;
 
     numElems = numBytes / bytesPerSample;
@@ -302,7 +310,7 @@ int WavInFile::read()
             double conv = 1.0 / 128.0;
             for (int i = 0; i < numElems; i ++)
             {
-                buffer.pData[i] = static_cast<float>(temp2[i] * conv - 1.0);
+                buffer.pData[i] = (float)(temp2[i] * conv - 1.0);
             }
             break;
         }
@@ -314,7 +322,7 @@ int WavInFile::read()
             for (int i = 0; i < numElems; i ++)
             {
                 short value = temp2[i];
-                buffer.pData[i] = static_cast<float>(value * conv);
+                buffer.pData[i] = (float)(value * conv);
             }
             break;
         }
@@ -328,7 +336,7 @@ int WavInFile::read()
                 int value = *((int*)temp2);
                 value = value & 0x00ffffff;             // take 24 bits
                 value |= (value & 0x00800000) ? 0xff000000 : 0;  // extend minus sign bits
-                buffer.pData[i] = static_cast<float>(value * conv);
+                buffer.pData[i] = (float)(value * conv);
                 temp2 += 3;
             }
             break;
@@ -342,7 +350,7 @@ int WavInFile::read()
             for (int i = 0; i < numElems; i ++)
             {
                 int value = temp2[i];
-                buffer.pData[i] = static_cast<float>((value * conv));
+                buffer.pData[i] = (float)(value * conv);
             }
             break;
         }
@@ -364,7 +372,7 @@ int WavInFile::read()
 WavOutFile::WavOutFile(const char *fileName, MMbuffer<float> &buffer)
 {
     fptr = fopen(fileName, "wb");
-    if (fptr == nullptr)
+    if (fptr == NULL)
     {
         checkflag = 1;
     }
@@ -375,20 +383,30 @@ WavOutFile::WavOutFile(const char *fileName, MMbuffer<float> &buffer)
 WavOutFile::~WavOutFile()
 {
     if (fptr) fclose(fptr);
-    fptr = nullptr;
+    fptr = NULL;
 }
 
 
-void WavOutFile::writeBaseHeader(MMbuffer<float> &buffer)
+void WavOutFile::writeBaseHeader(const MMbuffer<float> &buffer)
 {
     fwrite(&(buffer.riff), sizeof (buffer.riff), 1, fptr);
-    fwrite(&(buffer.format),sizeof (buffer.format),1,fptr);
+    if(fwrite(&(buffer.format),sizeof (buffer.format),1,fptr)) {
+        cout<< "success2"<<endl;
+    };
     if(buffer.fact.factSign == factStr){
         fwrite(&(buffer.fact),sizeof (buffer.fact),1,fptr);
 
     }
     fwrite(&(buffer.data),sizeof (buffer.data),1,fptr);
 }
+
+//void WavOutFile::finishHeader()
+//{
+//    // supplement the length of whole file, data length and fact sample length in the header.
+//    riff.lenAll = static_cast<uint32_t>(bytesWritten) + sizeof(WavFormat) + sizeof(WavFact) + sizeof(WavData) + 4;
+//    data.lenData = static_cast<uint32_t>(bytesWritten);
+//    fact.factSamplelen = static_cast<uint32_t>(bytesWritten) / format.BlockAlign;
+//}
 
 int WavOutFile::saturate(float fvalue, float minval, float maxval)
 {
@@ -400,7 +418,7 @@ int WavOutFile::saturate(float fvalue, float minval, float maxval)
     {
         fvalue = minval;
     }
-    return static_cast<int>(fvalue);
+    return (int)fvalue;
 }
 
 
@@ -434,7 +452,7 @@ void WavOutFile::write( MMbuffer<float> &buffer)
             short *temp2 = (short*) temp;
             for (int i = 0; i < numElems; i ++)
             {
-                short value = static_cast<short>(saturate(dataBuffer[i] * 32768.0f, -32768.0f, 32767.0f));
+                short value = (short)saturate(dataBuffer[i] * 32768.0f, -32768.0f, 32767.0f);
                 temp2[i] = value;
             }
             break;
@@ -464,7 +482,7 @@ void WavOutFile::write( MMbuffer<float> &buffer)
         }
 
     }
-    int res = static_cast<int>(fwrite(temp, 1, static_cast<size_t>(numBytes), fptr));
+    int res = (int)fwrite(temp, 1, numBytes, fptr);
 
     if (res != numBytes)
     {
@@ -472,11 +490,3 @@ void WavOutFile::write( MMbuffer<float> &buffer)
     }
     delete[] temp;
 }
-
-
-
-
-
-
-
-
