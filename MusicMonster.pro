@@ -43,7 +43,8 @@ SOURCES += \
     GUI/changepitch.cpp \
     GUI/playbackdialog.cpp \
     Waveform/wavWidget.cpp \
-    Waveform/fft.cpp
+    Waveform/fft.cpp \
+    GUI/cutdialog.cpp
 
 
 HEADERS += \
@@ -64,7 +65,8 @@ HEADERS += \
     GUI/playbackdialog.h \
     DataProcessing/mmtempo.h \
     Waveform/wavWidget.h \
-    Waveform/fft.h
+    Waveform/fft.h \
+    GUI/cutdialog.h
 
 FORMS += \
     GUI/newdialogForm.ui \
@@ -75,7 +77,8 @@ FORMS += \
     GUI/changepitch.ui \
     GUI/playbackdialog.ui \
     GUI/highlowshelfdialog.ui \
-    GUI/bandnotchdialog.ui
+    GUI/bandnotchdialog.ui \
+    GUI/cutdialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

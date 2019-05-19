@@ -119,12 +119,10 @@ void Audio::addToPlayList(QString fileName)
     qDebug() << playList->mediaCount();
 }
 
-QString Audio::getAudioDuration()
+double Audio::getAudioDuration()
 {
-    int move = static_cast<int>(player->duration());
-    QTime duration(0, (move / 60000) % 60, (move / 1000) % 60);
-    timeString = duration.toString("mm:ss");
-    return timeString;
+    double move = static_cast<double>(player->duration() / 1000);
+    return move;
 }
 
 void Audio::musicRecycle(bool flag)

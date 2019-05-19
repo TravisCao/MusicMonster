@@ -137,7 +137,7 @@ void setTempo(double newTempo, MMbuffer<ValueType> &source, MMbuffer<ValueType> 
                 //float j = source.pData[i_forin];
                 float out = source.pData[i_forin];
                 outcome.pData[i_forout] = out; //source.pData[i_forin];
-                cout<< outcome.pData[i_forout];
+                cout<< outcome.pData[i_forout]<<endl;
                 i_forout += 1;
                 i_forin += 2;
                 //if (i_forout == outcome.getDataSize() - 2)  break;
@@ -161,23 +161,7 @@ void setTempo(double newTempo, MMbuffer<ValueType> &source, MMbuffer<ValueType> 
 
         }
 }
-    else if (newTempo == 1.5) {
-        outcome.setDataSize((2/3)*source.getDataSize());
-        outcome.initializeData();
 
-        if(source.getDataNum() == 1){
-            while (i_forin < sampleEnd){
-
-            }
-        }
-        else if (source.getSampleNum() == 2) {
-            while (i_forin < sampleEnd){
-
-            }
-
-        }
-
-    }
     else if (newTempo == 1.55){                 //tempo为原来 1.5 倍
             outcome.setDataSize( (2/3) * source.getDataSize());
             outcome.initializeData();
@@ -430,7 +414,7 @@ void setTempo(double newTempo, MMbuffer<ValueType> &source, MMbuffer<ValueType> 
 
         }/*只支持单声道*/
 
-    else if (newTempo == 99.0){          //make the reverse music, butttt it may not run,,,
+    else if (newTempo == 99.0){          //make the reverse music,
         outcome.setDataSize(source.getDataSize());
         outcome.initializeData();
         int i_reverse = sampleEnd;
@@ -575,4 +559,47 @@ void setTempo(double newTempo, MMbuffer<ValueType> &source, MMbuffer<ValueType> 
     outcome.calByteRate();
     outcome.callenAll();
 }
+
+
+template<typename ValueType>
+void MMcut(double t1, double t2, double t, MMbuffer<ValueType> &source, MMbuffer<ValueType> &outcome){
+    t1 = t1 - 1;
+    t2 = t2 - 1;
+    outcome = source;
+    int i = 0;
+    int i_forin = (t1/t) * source.getDataNum();
+    int i_forout = 0;
+    int sampleEnd =((t2-t1-1)/t) * (source.getDataNum()) - 1;
+    outcome.setDataSize(((t2 - t1 - 1) / t)*source.getDataSize());
+    outcome.initializeData();
+    if(source.getChannelNum() == 1){
+        while (i < sampleEnd) {
+
+           float out = source.pData[i_forin];
+           outcome.pData[i_forout] = out;
+           //cout<<outcome.pData[i_forout];
+           i_forin += 1;
+           i_forout += 1;
+           i+=1;
+    }
+    }
+    else {
+        while (i < sampleEnd) {
+
+            float outl = source.pData[i_forin];
+            float outr = source.pData[i_forin + 1];
+            outcome.pData[i_forout] = outl;
+            outcome.pData[i_forout + 1] = outr;
+            i_forin += 2;
+            i_forout += 2;
+            i+=2;
+           // cout<<i;
+        }
+    }
+    outcome.calBlockAlign();
+    outcome.calByteRate();
+    outcome.callenAll();
+
+}
+
 #endif // MMREALTEMPO_H

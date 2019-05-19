@@ -11,6 +11,7 @@
 #include "mmtempo.h"
 #include "mmrate.h"
 #include "wavWidget.h"
+#include "cutdialog.h"
 
 #include <string>
 
@@ -48,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     changeRateDialog = new ChangeRate1(this);
     changePitchDialog = new changepitch(this);
     playbackdialog = new playbackDialog(this);
+    cutdialog = new  cutDialog(this);
 
     filterDialog_1 = new FilterDialog(this);
     filterDialog_2 = new FilterDialog(this);
@@ -341,7 +343,6 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->actionAbout_Music_Mosnter, &QAction::triggered, this, &MainWindow::about);
     connect(uiMainWindow->actionSave, &QAction::triggered, this, &MainWindow::saveFile);
 
-
     connect(uiMainWindow->actionSave_As, &QAction::triggered, this, &MainWindow::showSaveAsFile);
 
     connect(saveasFileDialog, &saveAsFileDialog::accepted, this, &MainWindow::saveAsFile);
@@ -356,6 +357,7 @@ void MainWindow::connectionInit()
     connect(uiMainWindow->newButton, &QPushButton::pressed, this, &MainWindow::newFile);
     connect(uiMainWindow->saveButton, &QPushButton::pressed, this, &MainWindow::saveFile);
     connect(uiMainWindow->deleteButton, &QPushButton::pressed, this, &MainWindow::removeItemSender);
+
     connect(this, &MainWindow::removeItem, fileWidget, &FileWidget::removeItem);
     connect(this, &MainWindow::removeItem, audio, &Audio::removeMusic);
 
@@ -406,6 +408,15 @@ void MainWindow::connectionInit()
     connect(audio, &Audio::musicStart, this, &MainWindow::togglePlayButton);
     connect(audio, &Audio::musicPause, this, &MainWindow::togglePlayButton);
 
+    connect(uiMainWindow->actionundo, &QAction::triggered, this, &MainWindow::undo);
+    connect(uiMainWindow->actionRedo, &QAction::triggered, this, &MainWindow::redo);
+
+    connect(uiMainWindow->actionCut, &QAction::triggered, cutdialog, &cutDialog::show);
+    connect(uiMainWindow->actionCut, &QAction::triggered,
+            []{
+                qDebug() << "cutClicked";
+             });
+    connect(cutdialog,&cutDialog::accepted, this, &MainWindow::cutTime);
 
 }
 
@@ -515,6 +526,7 @@ void MainWindow::highPass()
         QString fileName = openedFileNames.at(rows.at(0));
         fileName.chop(4);
         QString outputFileName = fileName + "_HighPass.wav";
+        qDebug() << "outputFileName:" << outputFileName;
 
 
 #ifdef Q_OS_WIN
@@ -533,6 +545,7 @@ void MainWindow::highPass()
 #ifdef Q_OS_MAC
 
     QProcess proc;
+    qDebug() << "mac: ";
 
     args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
     args.append(fileName);
@@ -541,6 +554,18 @@ void MainWindow::highPass()
     args.append(filterDialog_1->getHighLowPassCutoff());
     args.append(filterDialog_1->getHighLowPassResonance());
 
+    qDebug() << filterDialog_1->getHighLowPassCutoff();
+    qDebug() << filterDialog_1->getHighLowPassResonance();
+//    args.append("/Users/travis/Documents/MusicMonster/Filter/a.out");
+//    args.append("/Users/travis/Desktop/ttt.wav");
+//    args.append("/Users/travis/Desktop/ttt_11.wav");
+//    args.append("highpass");
+//    args.append("20");
+//    args.append("20");
+
+    proc.setProgram("/Users/travis/Documents/MusicMonster/Filter/a.out");
+    proc.setArguments(args);
+    qDebug() << "mac: ";
     proc.start("/Users/travis/Documents/MusicMonster/Filter/a.out", args);
 
     proc.waitForFinished(-1);  //
@@ -815,4 +840,59 @@ void MainWindow::highShelf()
 
 }
 
+void MainWindow::undo()
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+        if (bufferIndex > 0) {
+        buffer = bufferList.at(bufferIndex - 1);
+        WavOutFile outFile(fileName.data(), *buffer);
+        }
+    }
 
+}
+
+void MainWindow::redo()
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+        if (bufferIndex < bufferList.size()) {
+        buffer = bufferList.at(bufferIndex + 1);
+        WavOutFile outFile(fileName.data(), *buffer);
+        }
+    }
+}
+
+void MainWindow::cutTime()
+{
+    QList<int> rows;
+    if (!fileWidget->selectionModel->hasSelection()) return;
+    rows = fileWidget->getSelectedRows();
+    if (rows.size() == 1) {
+        std::string fileName = openedFileNames.at(rows.at(0)).toStdString();
+        QList<MMbuffer<float>*> bufferList = fileWidget->fileList.at(rows.at(0)).bufferList;
+        int bufferIndex = fileWidget->fileList.at(rows.at(0)).bufferIndex;
+        MMbuffer<float> *buffer = bufferList.at(bufferIndex);
+
+        MMbuffer<float> *dbuffer = buffer;
+
+        MMcut(cutdialog->get_timeBegin(),cutdialog->get_timeEnd(), audio->getAudioDuration(), *buffer, *dbuffer);
+
+//        (fileWidget->fileList.at(rows.at(0)).bufferList).
+
+        WavOutFile outfile(fileName.data(), *dbuffer);
+
+    }
+}

@@ -1334,6 +1334,7 @@ QWidget#mainWidget:item:hover
     <addaction name="menuFilter"/>
     <addaction name="actionPlayback"/>
     <addaction name="separator"/>
+    <addaction name="actionCut_2"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1517,6 +1518,11 @@ QWidget#mainWidget:item:hover
   <action name="actionPlayback">
    <property name="text">
     <string>Playback</string>
+   </property>
+  </action>
+  <action name="actionCut_2">
+   <property name="text">
+    <string>Cut</string>
    </property>
   </action>
  </widget>

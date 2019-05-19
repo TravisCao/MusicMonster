@@ -10,6 +10,7 @@
 #include "playbackdialog.h"
 #include "changepitch.h"
 #include "changerate1.h"
+#include "cutdialog.h"
 
 #include <QMainWindow>
 #include <QList>
@@ -95,6 +96,12 @@ public slots:
 
     void highShelf();
 
+    void undo();
+
+    void redo();
+
+    void cutTime();
+
 private:
 
     void modelInit();
@@ -112,6 +119,8 @@ private:
     int bufferIndex;
 
     Audio *audio;
+
+    cutDialog    *cutdialog;
 
     playbackDialog *playbackdialog;
 

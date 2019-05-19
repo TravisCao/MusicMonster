@@ -48,7 +48,7 @@ public slots:
 
     void addToPlayList(QString fileName);
 
-    QString getAudioDuration();
+    double getAudioDuration();
 
     void musicRecycle(bool flag);
 

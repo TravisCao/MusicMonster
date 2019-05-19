@@ -31,7 +31,7 @@ public slots:
     void debug(const QItemSelection &selected);
 
 
-protected:
+public:
     struct fileItem
     {
         QStandardItem *fileName;
@@ -50,10 +50,6 @@ protected:
     QItemSelectionModel *selectionModel;
 
     QList<fileItem> fileList;
-
-private:
-
-    friend class MainWindow;
 
     void addItem(QString fileName);
 
